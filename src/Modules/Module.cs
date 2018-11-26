@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Salaros.Vtiger.VTWSCLib
 {
-    public class ModuleInfo
+    public class Module
     {
         /// <summary>
         /// Gets or sets the identifier prefix.
@@ -33,37 +33,37 @@ namespace Salaros.Vtiger.VTWSCLib
         public string Name { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this instance is createable.
+        /// Gets or sets a value indicating whether this instance is create-able.
         /// </summary>
         /// <value>
-        ///   <c>true</c> if this instance is createable; otherwise, <c>false</c>.
+        ///   <c>true</c> if this instance is create-able; otherwise, <c>false</c>.
         /// </value>
         [JsonProperty("createable")]
         public bool IsCreateable { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this instance is updateable.
+        /// Gets or sets a value indicating whether this instance is update-able.
         /// </summary>
         /// <value>
-        ///   <c>true</c> if this instance is updateable; otherwise, <c>false</c>.
+        ///   <c>true</c> if this instance is update-able; otherwise, <c>false</c>.
         /// </value>
         [JsonProperty("updateable")]
         public bool IsUpdateable { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this instance is deleteable.
+        /// Gets or sets a value indicating whether this instance is delete-able.
         /// </summary>
         /// <value>
-        ///   <c>true</c> if this instance is deleteable; otherwise, <c>false</c>.
+        ///   <c>true</c> if this instance is delete-able; otherwise, <c>false</c>.
         /// </value>
         [JsonProperty("deleteable")]
         public bool IsDeleteable { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this instance is retrieveable.
+        /// Gets or sets a value indicating whether this instance is retrieve-able.
         /// </summary>
         /// <value>
-        ///   <c>true</c> if this instance is retrieveable; otherwise, <c>false</c>.
+        ///   <c>true</c> if this instance is retrieve-able; otherwise, <c>false</c>.
         /// </value>
         [JsonProperty("retrieveable")]
         public bool IsRetrieveable { get; set; }

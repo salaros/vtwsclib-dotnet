@@ -25,9 +25,9 @@ namespace Salaros.Vtiger.VTWSCLib
         /// Lists all the vTiger entity types available through the API
         /// </summary>
         /// <returns>List of entity types</returns>
-        public async Task<ModuleInfo[]> GetAllAsync()
+        public async Task<Module[]> GetAllAsync()
         {
-            var typeInfos = await parentClient.InvokeOperationAsync<ModuleInfo[]>(
+            var typeInfos = await parentClient.InvokeOperationAsync<Module[]>(
                 "listtypes",
                 new Dictionary<string, string>(0),
                 HttpMethod.Get
@@ -39,7 +39,11 @@ namespace Salaros.Vtiger.VTWSCLib
             return typeInfos;
         }
 
-        public ModuleInfo[] GetAll()
+        /// <summary>
+        /// Gets the info on all the modules
+        /// </summary>
+        /// <returns></returns>
+        public Module[] GetAll()
         {
             var getAllTask = GetAllAsync();
             getAllTask.Wait();
@@ -51,16 +55,21 @@ namespace Salaros.Vtiger.VTWSCLib
         /// </summary>
         /// <param name="moduleName">Name of the module / entity type.</param>
         /// <returns>List of modules</returns>
-        public async Task<ModuleInfo> GetOneAsync(string moduleName)
+        public async Task<Module> GetOneAsync(string moduleName)
         {
-            return await parentClient.InvokeOperationAsync<ModuleInfo>(
+            return await parentClient.InvokeOperationAsync<Module>(
                 "describe",
                 new Dictionary<string, string> { { "elementType", moduleName } },
                 HttpMethod.Get
             );
         }
 
-        public ModuleInfo GetOne(string moduleName)
+        /// <summary>
+        /// Gets the one.
+        /// </summary>
+        /// <param name="moduleName">Name of the module.</param>
+        /// <returns></returns>
+        public Module GetOne(string moduleName)
         {
             var getOneTask = GetOneAsync(moduleName);
             getOneTask.Wait();
@@ -76,9 +85,9 @@ namespace Salaros.Vtiger.VTWSCLib
         /// <exception cref="WSException">
         /// Entity ID must be a valid number
         /// or
-        /// The following module is not installed: {moduleName}
+        /// The following module is not installed: moduleName
         /// </exception>
-        public async Task<string> GetTypedID(string moduleName, long entityID)
+        public async Task<string> GetTypedIdAsync(string moduleName, long entityID)
         {
             if (entityID < 1)
                 throw new WSException("Entity ID must be a valid number");
@@ -88,6 +97,24 @@ namespace Salaros.Vtiger.VTWSCLib
                 throw new WSException($"The following module is not installed: {moduleName}");
 
             return $"{typeInfo}x{entityID}";
+        }
+
+        /// <summary>
+        /// Gets the entity ID perpended with module / entity type ID.
+        /// </summary>
+        /// <param name="moduleName">Name of the module / entity type.</param>
+        /// <param name="entityID">Numeric entity ID.</param>
+        /// <returns>Returns false if it is not possible to retrieve module / entity type ID</returns>
+        /// <exception cref="WSException">
+        /// Entity ID must be a valid number
+        /// or
+        /// The following module is not installed: moduleName
+        /// </exception>
+        public string GetTypedID(string moduleName, long entityID)
+        {
+            var getTypedTask = GetTypedIdAsync(moduleName, entityID);
+            getTypedTask.Wait();
+            return getTypedTask.Result;
         }
     }
 }

@@ -12,6 +12,8 @@ namespace Salaros.Vtiger.VTWSCLib
 {
     public class Session
     {
+        #region Class fields
+
         /// <summary>
         /// The HTTP client
         /// </summary>
@@ -32,6 +34,10 @@ namespace Salaros.Vtiger.VTWSCLib
         /// </summary>
         protected long serviceExpireTime;
 
+        #endregion
+
+        #region Constructor
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Session"/> class.
         /// </summary>
@@ -40,6 +46,10 @@ namespace Salaros.Vtiger.VTWSCLib
         {
             this.parentClient = parentClient;
         }
+
+        #endregion
+
+        #region Send request and pass the challenge
 
         /// <summary>
         /// Gets a challenge token from the server and stores for future requests
@@ -149,25 +159,40 @@ namespace Salaros.Vtiger.VTWSCLib
                 );
             }
 
-            // Parse the response
+            // Parse the raw JSON response
             switch (JObject.Parse(jsonRaw))
             {
                 // Parse error object
-                case var errorObj when bool.TryParse(errorObj["error"]?.ToString(), out bool isSuccess) && isSuccess:
-                    var error = errorObj["error"];
+                case var errorObj when bool.TryParse(errorObj?["error"]?.ToString(), out bool isSuccess) && isSuccess:
+                    var error = errorObj?["error"];
                     throw new WSException(error?.Value<string>("message"), error?.Value<string>("code"));
                 
                 // Parse success / result object
-                case var successObj when bool.TryParse(successObj["success"]?.ToString(), out bool isSuccess) && isSuccess:
-                    var result = successObj["result"];
-                    return (typeof(JToken) == typeof(TRes))
-                        ? result as TRes            // Cast to JToken
-                        : result.ToObject<TRes>();  // Convert to the actual object
+                case var successObj when bool.TryParse(successObj?["success"]?.ToString(), out bool isSuccess) && isSuccess:
+                    var result = successObj?["result"];
+                    switch (typeof(TRes))
+                    {
+                        // Cast to JToken
+                        case Type jtoken when jtoken == typeof(JToken):
+                            return result as TRes;
+                        
+                        // Cast to CRM entity
+                        case Type entity when entity == typeof(CrmEntity):
+                            return new CrmEntity(result as JToken) as TRes;
+
+                        // Try to convert JObject to the actual type
+                        default:
+                            return result.ToObject<TRes>();
+                    }
 
                 default:
                     throw new WSException($"Failed to parse the following vTiger response: '{jsonRaw}'");
             }
         }
+
+        #endregion Send request and pass the challenge
+
+        #region Login
 
         /// <summary>
         /// Login to the server using username and VTiger access key token
@@ -207,7 +232,7 @@ namespace Salaros.Vtiger.VTWSCLib
             name = result.Value<string>("sessionName");
 
             // Backing up logged in user credentials
-            CurrentUser = new UserInfo
+            CurrentUser = new User
             {
                 Id = result?.Value<string>("userId"),
                 UserName = userName,
@@ -249,6 +274,10 @@ namespace Salaros.Vtiger.VTWSCLib
             return await Login(userName, accessKey);
         }
 
+        #endregion Login
+
+        #region CRM properties
+
         /// <summary>
         /// Gets vTiger CRM and WebServices API version
         /// </summary>
@@ -271,6 +300,8 @@ namespace Salaros.Vtiger.VTWSCLib
         /// <value>
         /// Basic information about current API user
         /// </value>
-        public UserInfo CurrentUser { get; private set; }
+        public User CurrentUser { get; private set; }
+
+        #endregion CRM properties
     }
 }

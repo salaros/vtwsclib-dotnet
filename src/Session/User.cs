@@ -1,6 +1,6 @@
 ﻿namespace Salaros.Vtiger.VTWSCLib
 {
-    public class UserInfo
+    public class User
     {
         /// <summary>
         /// Gets the identifier.

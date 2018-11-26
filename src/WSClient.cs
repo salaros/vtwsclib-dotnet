@@ -70,6 +70,40 @@ namespace Salaros.Vtiger.VTWSCLib
         }
 
         /// <summary>
+        /// Executes the query asynchronous.
+        /// </summary>
+        /// <typeparam name="TRes">The type of the resource.</typeparam>
+        /// <param name="query">The query string / expression.</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException">query</exception>
+        public async Task<TRes> ExecuteQueryAsync<TRes>(string query)
+            where TRes : class
+        {
+            if (string.IsNullOrWhiteSpace(query))
+                throw new ArgumentException(nameof(query));
+
+            return await InvokeOperationAsync<TRes>(
+                "query", 
+                new Dictionary<string, string> { { "query", query } }, 
+                HttpMethod.Get
+            );
+        }
+
+        /// <summary>
+        /// Executes the query.
+        /// </summary>
+        /// <typeparam name="TRes">The type of the resource.</typeparam>
+        /// <param name="query">The query string / expression.</param>
+        /// <returns></returns>
+        public TRes ExecuteQuery<TRes>(string query)
+            where TRes : class
+        {
+            var queryTask = ExecuteQueryAsync<TRes>(query);
+            queryTask.Wait();
+            return queryTask?.Result;
+        }
+
+        /// <summary>
         /// Invokes the operation.
         /// </summary>
         /// <typeparam name="TRes">The type of the resource.</typeparam>
