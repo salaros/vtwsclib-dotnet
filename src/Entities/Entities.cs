@@ -374,6 +374,7 @@ namespace Salaros.Vtiger.VTWSCLib
             if (string.IsNullOrWhiteSpace(moduleName))
                 requestData["elementType"] = moduleName;
 
+            // TODO create a class structure for sync result object
             return await parentClient.InvokeOperationAsync<JToken>("sync", requestData, HttpMethod.Get);
         }
 
@@ -387,7 +388,7 @@ namespace Salaros.Vtiger.VTWSCLib
         {
             var syncTask = SyncAsync(modifiedTime, moduleName);
             syncTask.Wait();
-            return syncTask.Result;
+            return syncTask.Result; // TODO create a class structure for sync result object
         }
 
         #endregion Sync
