@@ -53,7 +53,7 @@ namespace Salaros.Vtiger.VTWSCLib
                 { "username", userName }
             };
 
-            var result = await SendHttpRequest<JToken>(challengeData, WebRequestMethods.Http.Get);
+            var result = await SendHttpRequestAsync<JToken>(challengeData, HttpMethod.Get);
             if (null == result)
                 return false;
 
@@ -64,15 +64,43 @@ namespace Salaros.Vtiger.VTWSCLib
         }
 
         /// <summary>
+        /// Sends the HTTP request.
+        /// </summary>
+        /// <typeparam name="TRes">The type of the resource.</typeparam>
+        /// <param name="requestData">The request data.</param>
+        /// <param name="method">The method.</param>
+        /// <returns></returns>
+        internal TRes SendHttpRequest<TRes>(Dictionary<string, string> requestData, HttpMethod method = null)
+            where TRes : class
+        {
+            var sendRequestTask = SendHttpRequestAsync<TRes>(requestData, method);
+            sendRequestTask.Wait();
+            return sendRequestTask.Result;
+        }
+
+        /// <summary>
         /// Sends HTTP request to VTiger web service API endpoint
         /// </summary>
-        /// <typeparam name="T">The type of the result. Use <see cref="JToken"/> if you are not sure on type to use.</typeparam>
+        /// <typeparam name="TRes">The type of the resource.</typeparam>
         /// <param name="requestData">HTTP request data.</param>
-        /// <param name="method">HTTP request method (GET, POST etc), use <see cref="WebRequestMethods.Http"/> verbs</param>
-        /// <returns>Returns request result object (null in case of failure)</returns>
-        internal async Task<T> SendHttpRequest<T>(Dictionary<string, string> requestData, string method = WebRequestMethods.Http.Post)
-            where T : class
+        /// <param name="method">HTTP request method (GET, POST etc), use <see cref="WebRequestMethods.Http" /> verbs</param>
+        /// <returns>
+        /// Returns request result object (null in case of failure)
+        /// </returns>
+        /// <exception cref="ArgumentException">Please specify a valid operation - requestData</exception>
+        /// <exception cref="WSException">Unsupported request type {method}
+        /// or
+        /// Failed to execute request on the following URL, FAILED_SENDING_REQUEST
+        /// or
+        /// or
+        /// Failed to parse the following vTiger response: raw JSON response</exception>
+        /// <exception cref="Uri"></exception>
+        internal async Task<TRes> SendHttpRequestAsync<TRes>(Dictionary<string, string> requestData, HttpMethod method = null)
+            where TRes : class
         {
+            if (null == method)
+                method = HttpMethod.Post;
+
             if (!requestData.TryGetValue("operation", out string operation) || string.IsNullOrWhiteSpace(operation))
                 throw new ArgumentException($"Please specify a valid {nameof(operation)}", nameof(requestData));
 
@@ -96,14 +124,14 @@ namespace Salaros.Vtiger.VTWSCLib
 
                 switch (method)
                 {
-                    case WebRequestMethods.Http.Get:
+                    case var _ when HttpMethod.Get.Method.Equals(method.Method):
                         var query = string.Join("&", requestData.ToList()
                                 .Select(i => $"{i.Key}={Uri.EscapeUriString(i.Value ?? string.Empty)}"));
                         requestUrl = $"?{query}";
                         jsonRaw = await httpClient.GetStringAsync(requestUrl);
                         break;
 
-                    case WebRequestMethods.Http.Post:
+                    case var _ when HttpMethod.Post.Method.Equals(method.Method):
                         var result = await httpClient.PostAsync(requestUrl, new FormUrlEncodedContent(requestData.ToList()));
                         jsonRaw = await result.Content.ReadAsStringAsync();
                         break;
@@ -132,9 +160,9 @@ namespace Salaros.Vtiger.VTWSCLib
                 // Parse success / result object
                 case var successObj when bool.TryParse(successObj["success"]?.ToString(), out bool isSuccess) && isSuccess:
                     var result = successObj["result"];
-                    return (typeof(JToken) == typeof(T))
-                        ? result as T               // Cast to JToken
-                        : result.ToObject<T>();     // Convert to the actual object
+                    return (typeof(JToken) == typeof(TRes))
+                        ? result as TRes            // Cast to JToken
+                        : result.ToObject<TRes>();  // Convert to the actual object
 
                 default:
                     throw new WSException($"Failed to parse the following vTiger response: '{jsonRaw}'");
@@ -164,7 +192,7 @@ namespace Salaros.Vtiger.VTWSCLib
                 .Aggregate((s, c) => s + c)
                 .ToLowerInvariant();
 
-            var result = await SendHttpRequest<JToken>(
+            var result = await SendHttpRequestAsync<JToken>(
                 new Dictionary<string, string> {
                     { "operation", "login" },
                     { "username", userName },
@@ -208,7 +236,7 @@ namespace Salaros.Vtiger.VTWSCLib
             if (await PassChallenge(userName))
                 return false;
 
-            var result = await SendHttpRequest<JToken>(
+            var result = await SendHttpRequestAsync<JToken>(
                 new Dictionary<string, string> {
                     { "operation", "login_pwd" },
                     { "username", userName },

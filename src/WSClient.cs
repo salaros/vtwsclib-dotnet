@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace Salaros.Vtiger.VTWSCLib
@@ -24,26 +26,79 @@ namespace Salaros.Vtiger.VTWSCLib
             Session = new Session(this);
 
             RequestTimeout = requestTimeout;
-
             WebServiceUrl = new Uri(crmUrl, relativeUrl);
 
-            Task<bool> loginTask;
-            switch (authMode) {
+            if (!Login(userName, secret, authMode))
+                throw new WSException($"Failed to log into vTiger CRM (User: '{userName}', URL: {crmUrl})");
+        }
+
+        /// <summary>
+        /// Logins the asynchronous.
+        /// </summary>
+        /// <param name="userName">Name of the user.</param>
+        /// <param name="secret">The secret.</param>
+        /// <param name="authMode">The authentication mode.</param>
+        /// <returns></returns>
+        /// <exception cref="WSException">Unknown login mode: '{authMode}</exception>
+        internal async Task<bool> LoginAsync(string userName, string secret, AuthMode authMode = AuthMode.AccessKey)
+        {
+            switch (authMode)
+            {
                 case AuthMode.AccessKey:
-                    loginTask = Session.Login(userName, secret);
-                    break;
+                    return await Session.Login(userName, secret);
 
                 case AuthMode.Password:
-                    loginTask = Session.LoginPassword(userName, secret);
-                    break;
+                    return await Session.LoginPassword(userName, secret);
 
                 default:
                     throw new WSException($"Unknown login mode: '{authMode}'");
             }
+        }
 
+        /// <summary>
+        /// Logins the specified user name.
+        /// </summary>
+        /// <param name="userName">Name of the user.</param>
+        /// <param name="secret">The secret.</param>
+        /// <param name="authMode">The authentication mode.</param>
+        /// <returns></returns>
+        internal bool Login(string userName, string secret, AuthMode authMode = AuthMode.AccessKey)
+        {
+            var loginTask = LoginAsync(userName, secret, authMode);
             loginTask.Wait();
-            if (!loginTask.Result)
-                throw new WSException($"Failed to log into vTiger CRM (User: '{userName}', URL: {crmUrl})");
+            return loginTask?.Result ?? false;
+        }
+
+        /// <summary>
+        /// Invokes the operation.
+        /// </summary>
+        /// <typeparam name="TRes">The type of the resource.</typeparam>
+        /// <param name="operation">The operation.</param>
+        /// <param name="operationData">The dictionary.</param>
+        /// <param name="method">The method.</param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public async Task<TRes> InvokeOperationAsync<TRes>(string operation, Dictionary<string, string> operationData, HttpMethod method)
+            where TRes : class
+        {
+            operationData["operation"] = operation;
+            return await Session.SendHttpRequestAsync<TRes>(operationData, method);
+        }
+
+        /// <summary>
+        /// Invokes the operation.
+        /// </summary>
+        /// <typeparam name="TRes">The type of the resource.</typeparam>
+        /// <param name="operation">The operation.</param>
+        /// <param name="operationData">The operation data.</param>
+        /// <param name="method">The method.</param>
+        /// <returns></returns>
+        public TRes InvokeOperation<TRes>(string operation, Dictionary<string, string> operationData, HttpMethod method)
+            where TRes : class
+        {
+            var invokeTask = InvokeOperationAsync<TRes>(operation, operationData, method);
+            invokeTask.Wait();
+            return invokeTask?.Result;
         }
 
         public Uri WebServiceUrl { get; internal set; }

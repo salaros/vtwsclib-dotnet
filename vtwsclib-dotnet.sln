@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.28307.106
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VTWSCLib", "src\VTWSCLib.csproj", "{3CAA86E8-645C-443C-9D6F-C4CA3E578704}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp1", "..\..\..\..\Desktop\ConsoleApp1\ConsoleApp1.csproj", "{78D7F6FF-76CD-45C5-B23B-024C2A31C928}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp", "..\..\..\..\Desktop\ConsoleApp1\ConsoleApp.csproj", "{78D7F6FF-76CD-45C5-B23B-024C2A31C928}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
