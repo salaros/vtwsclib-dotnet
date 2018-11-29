@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using System.Collections;
 
 namespace Salaros.Vtiger.WebService
 {
@@ -179,6 +180,15 @@ namespace Salaros.Vtiger.WebService
                         // Cast to CRM entity
                         case Type entity when entity == typeof(CrmEntity):
                             return new CrmEntity(result as JToken) as TRes;
+
+                        // Cast to array of CRM entities
+                        case Type entities when entities.IsArray && entities == typeof(CrmEntity[]):
+                            return result.Select(e => new CrmEntity(e as JToken))?.ToArray() as TRes;
+
+                        // Array of the given type
+                        case Type objects when objects.IsArray:
+                            var singleType = Type.GetType(objects.FullName.Replace("[]", string.Empty));
+                            return new ArrayList(result.Select(e => e.ToObject(singleType)).ToArray()).ToArray(singleType) as TRes;
 
                         // Try to convert JObject to the actual type
                         default:
