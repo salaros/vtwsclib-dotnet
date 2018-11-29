@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -132,13 +132,6 @@ namespace Salaros.Vtiger.WebService
         public async Task<TEntity[]> FindManyAsync<TEntity>(string moduleName, IDictionary<string, string> @params, IList<string> select = null, int limit = 0)
             where TEntity : class
         {
-            if (!(@params?.Any() ?? false))
-            {
-                throw new WebServiceException(
-                    "You have to specify at least one search parameter (prop => value) in order to be able to retrieve entity(ies)"
-                );
-            }
-
             // Builds the query
             var query = GetQueryString(moduleName, @params, select, limit);
 
@@ -184,13 +177,6 @@ namespace Salaros.Vtiger.WebService
         public async Task<TEntity> CreateOneAsync<TEntity>(string moduleName, IDictionary<string, string> @params)
             where TEntity : class
         {
-            if (!(@params?.Any() ?? false))
-            {
-                throw new WebServiceException(
-                    "You have to specify at least one search parameter (prop => value) in order to be able to create an entity"
-                );
-            }
-
             // Assign record to logged in user if not user has been specified
             if (!@params.ContainsKey("assigned_user_id"))
                 @params["assigned_user_id"] = parentClient.Session.CurrentUser.Id;
@@ -242,12 +228,6 @@ namespace Salaros.Vtiger.WebService
         public async Task<TEntity> UpdateOneAsync<TEntity>(string moduleName, string entityId, IDictionary<string, string> @params)
             where TEntity : class
         {
-            if (!(@params?.Any() ?? false))
-            {
-                throw new WebServiceException(
-                    "You have to specify at least one search parameter (prop => value) in order to be able to update the entity(ies)"
-                );
-            }
             // Fail if no ID was supplied
             if (string.IsNullOrWhiteSpace(entityId))
                 throw new WebServiceException("The list of constrains must contain a valid ID");
