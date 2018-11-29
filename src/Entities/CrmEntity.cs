@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json.Linq;
 using System.Linq;
 
-namespace Salaros.Vtiger.VTWSCLib
+namespace Salaros.Vtiger.WebService
 {
     public class CrmEntity
     {

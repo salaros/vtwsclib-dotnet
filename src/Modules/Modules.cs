@@ -3,20 +3,20 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace Salaros.Vtiger.VTWSCLib
+namespace Salaros.Vtiger.WebService
 {
     public class Modules
     {
         /// <summary>
-        /// The parent <see cref="WSClient"/> client object
+        /// The parent <see cref="WebServiceClient"/> client object
         /// </summary>
-        protected WSClient parentClient;
+        protected WebServiceClient parentClient;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Modules"/> class.
         /// </summary>
         /// <param name="parentClient">The parent client.</param>
-        public Modules(WSClient parentClient)
+        public Modules(WebServiceClient parentClient)
         {
             this.parentClient = parentClient;
         }
@@ -34,7 +34,7 @@ namespace Salaros.Vtiger.VTWSCLib
             );
 
             if (typeInfos?.Any() ?? false)
-                throw new WSException($"Failed to retrieve CRM modules");
+                throw new WebServiceException($"Failed to retrieve CRM modules");
 
             return typeInfos;
         }
@@ -82,7 +82,7 @@ namespace Salaros.Vtiger.VTWSCLib
         /// <param name="moduleName">Name of the module / entity type.</param>
         /// <param name="entityID">Numeric entity ID.</param>
         /// <returns>Returns false if it is not possible to retrieve module / entity type ID</returns>
-        /// <exception cref="WSException">
+        /// <exception cref="WebServiceException">
         /// Entity ID must be a valid number
         /// or
         /// The following module is not installed: moduleName
@@ -90,11 +90,11 @@ namespace Salaros.Vtiger.VTWSCLib
         public async Task<string> GetTypedIdAsync(string moduleName, long entityID)
         {
             if (entityID < 1)
-                throw new WSException("Entity ID must be a valid number");
+                throw new WebServiceException("Entity ID must be a valid number");
 
             var typeInfo = await GetOneAsync(moduleName);
             if (null == typeInfo || string.IsNullOrWhiteSpace(typeInfo.IdPrefix))
-                throw new WSException($"The following module is not installed: {moduleName}");
+                throw new WebServiceException($"The following module is not installed: {moduleName}");
 
             return $"{typeInfo}x{entityID}";
         }
@@ -105,7 +105,7 @@ namespace Salaros.Vtiger.VTWSCLib
         /// <param name="moduleName">Name of the module / entity type.</param>
         /// <param name="entityID">Numeric entity ID.</param>
         /// <returns>Returns false if it is not possible to retrieve module / entity type ID</returns>
-        /// <exception cref="WSException">
+        /// <exception cref="WebServiceException">
         /// Entity ID must be a valid number
         /// or
         /// The following module is not installed: moduleName

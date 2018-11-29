@@ -1,4 +1,4 @@
-﻿namespace Salaros.Vtiger.VTWSCLib
+﻿namespace Salaros.Vtiger.WebService
 {
     public class User
     {

@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 
-namespace Salaros.Vtiger.VTWSCLib
+namespace Salaros.Vtiger.WebService
 {
     public class Module
     {

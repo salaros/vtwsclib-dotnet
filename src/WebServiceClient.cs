@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace Salaros.Vtiger.VTWSCLib
+namespace Salaros.Vtiger.WebService
 {
-    public class WSClient
+    public class WebServiceClient
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="WSClient" /> class.
+        /// Initializes a new instance of the <see cref="WebServiceClient" /> class.
         /// </summary>
         /// <param name="crmUrl">The URL of the remote CRM server.</param>
         /// <param name="userName">User name.</param>
@@ -16,10 +16,10 @@ namespace Salaros.Vtiger.VTWSCLib
         /// <param name="authMode">The authentication mode, defaults to <paramref name="userName" /> + access key</param>
         /// <param name="relativeUrl">The relative URL.</param>
         /// <param name="requestTimeout">Optional request timeout in seconds.</param>
-        /// <exception cref="WSException">Unknown login mode: <paramref name="authMode" />
+        /// <exception cref="WebServiceException">Unknown login mode: <paramref name="authMode" />
         /// or
         /// Failed to log into vTiger CRM (User: <paramref name="userName" />, URL: <paramref name="vtigerUrl" />)</exception>
-        public WSClient(Uri crmUrl, string userName, string secret, AuthMode authMode = AuthMode.AccessKey, string relativeUrl = "webservice.php", int requestTimeout = 0)
+        public WebServiceClient(Uri crmUrl, string userName, string secret, AuthMode authMode = AuthMode.AccessKey, string relativeUrl = "webservice.php", int requestTimeout = 0)
         {
             Modules = new Modules(this);
             Entities = new Entities(this);
@@ -29,7 +29,7 @@ namespace Salaros.Vtiger.VTWSCLib
             WebServiceUrl = new Uri(crmUrl, relativeUrl);
 
             if (!Login(userName, secret, authMode))
-                throw new WSException($"Failed to log into vTiger CRM (User: '{userName}', URL: {crmUrl})");
+                throw new WebServiceException($"Failed to log into vTiger CRM (User: '{userName}', URL: {crmUrl})");
         }
 
         /// <summary>
@@ -39,7 +39,7 @@ namespace Salaros.Vtiger.VTWSCLib
         /// <param name="secret">The secret.</param>
         /// <param name="authMode">The authentication mode.</param>
         /// <returns></returns>
-        /// <exception cref="WSException">Unknown login mode: '{authMode}</exception>
+        /// <exception cref="WebServiceException">Unknown login mode: '{authMode}</exception>
         internal async Task<bool> LoginAsync(string userName, string secret, AuthMode authMode = AuthMode.AccessKey)
         {
             switch (authMode)
@@ -51,7 +51,7 @@ namespace Salaros.Vtiger.VTWSCLib
                     return await Session.LoginPassword(userName, secret);
 
                 default:
-                    throw new WSException($"Unknown login mode: '{authMode}'");
+                    throw new WebServiceException($"Unknown login mode: '{authMode}'");
             }
         }
 

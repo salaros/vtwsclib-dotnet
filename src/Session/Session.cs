@@ -8,7 +8,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Salaros.Vtiger.VTWSCLib
+namespace Salaros.Vtiger.WebService
 {
     public class Session
     {
@@ -20,9 +20,9 @@ namespace Salaros.Vtiger.VTWSCLib
         protected HttpClient httpClient;
 
         /// <summary>
-        /// The parent <see cref="WSClient"/> client object
+        /// The parent <see cref="WebServiceClient"/> client object
         /// </summary>
-        protected WSClient parentClient;
+        protected WebServiceClient parentClient;
 
         /// <summary>
         /// Session name and token
@@ -42,7 +42,7 @@ namespace Salaros.Vtiger.VTWSCLib
         /// Initializes a new instance of the <see cref="Session"/> class.
         /// </summary>
         /// <param name="parentClient">The parent client.</param>
-        public Session(WSClient parentClient)
+        public Session(WebServiceClient parentClient)
         {
             this.parentClient = parentClient;
         }
@@ -98,7 +98,7 @@ namespace Salaros.Vtiger.VTWSCLib
         /// Returns request result object (null in case of failure)
         /// </returns>
         /// <exception cref="ArgumentException">Please specify a valid operation - requestData</exception>
-        /// <exception cref="WSException">Unsupported request type {method}
+        /// <exception cref="WebServiceException">Unsupported request type {method}
         /// or
         /// Failed to execute request on the following URL, FAILED_SENDING_REQUEST
         /// or
@@ -147,12 +147,12 @@ namespace Salaros.Vtiger.VTWSCLib
                         break;
 
                     default:
-                        throw new WSException($"Unsupported request type {method}");
+                        throw new WebServiceException($"Unsupported request type {method}");
                 }
             }
             catch (HttpRequestException ex)
             {
-                throw new WSException(
+                throw new WebServiceException(
                     $"Failed to execute {method} request on the following URL: '{new Uri(httpClient.BaseAddress, requestUrl)}'. {ex.Message}",
                     "FAILED_SENDING_REQUEST",
                     ex
@@ -165,7 +165,7 @@ namespace Salaros.Vtiger.VTWSCLib
                 // Parse error object
                 case var errorObj when bool.TryParse(errorObj?["error"]?.ToString(), out bool isSuccess) && isSuccess:
                     var error = errorObj?["error"];
-                    throw new WSException(error?.Value<string>("message"), error?.Value<string>("code"));
+                    throw new WebServiceException(error?.Value<string>("message"), error?.Value<string>("code"));
                 
                 // Parse success / result object
                 case var successObj when bool.TryParse(successObj?["success"]?.ToString(), out bool isSuccess) && isSuccess:
@@ -186,7 +186,7 @@ namespace Salaros.Vtiger.VTWSCLib
                     }
 
                 default:
-                    throw new WSException($"Failed to parse the following vTiger response: '{jsonRaw}'");
+                    throw new WebServiceException($"Failed to parse the following vTiger response: '{jsonRaw}'");
             }
         }
 
@@ -223,7 +223,7 @@ namespace Salaros.Vtiger.VTWSCLib
                     { "username", userName },
                     { "accessKey", saltedAccessKey }
                 }
-            ) ?? throw new WSException("Failed to log in");
+            ) ?? throw new WebServiceException("Failed to log in");
 
             if (null == result)
                 return false;
@@ -267,7 +267,7 @@ namespace Salaros.Vtiger.VTWSCLib
                     { "username", userName },
                     { "password", password },
                 }
-            ) ?? throw new WSException("Failed to log in");
+            ) ?? throw new WebServiceException("Failed to log in");
 
             // Extract access key from user + password login
             var accessKey = result?.FirstOrDefault()?.Value<string>() ?? result?.Value<string>("accesskey");

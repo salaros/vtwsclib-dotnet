@@ -3,7 +3,14 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.106
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VTWSCLib", "src\VTWSCLib.csproj", "{3CAA86E8-645C-443C-9D6F-C4CA3E578704}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebService.Client", "src\WebService.Client.csproj", "{3CAA86E8-645C-443C-9D6F-C4CA3E578704}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{655587BD-BEA8-4DA6-9191-620164E0E8FF}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

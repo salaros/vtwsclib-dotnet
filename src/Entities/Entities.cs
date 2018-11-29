@@ -6,14 +6,14 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace Salaros.Vtiger.VTWSCLib
+namespace Salaros.Vtiger.WebService
 {
     public class Entities
     {
         /// <summary>
-        /// The parent <see cref="WSClient"/> client object
+        /// The parent <see cref="WebServiceClient"/> client object
         /// </summary>
-        protected WSClient parentClient;
+        protected WebServiceClient parentClient;
 
         #region Constructor
 
@@ -21,7 +21,7 @@ namespace Salaros.Vtiger.VTWSCLib
         /// Initializes a new instance of the <see cref="Entities"/> class.
         /// </summary>
         /// <param name="parentClient">The parent client.</param>
-        public Entities(WSClient parentClient)
+        public Entities(WebServiceClient parentClient)
         {
             this.parentClient = parentClient;
         }
@@ -128,13 +128,13 @@ namespace Salaros.Vtiger.VTWSCLib
         /// <returns>
         /// The array containing matching entries or false if nothing was found
         /// </returns>
-        /// <exception cref="WSException">You have to specify at least one search parameter (prop => value) in order to be able to retrieve entity(ies)</exception>
+        /// <exception cref="WebServiceException">You have to specify at least one search parameter (prop => value) in order to be able to retrieve entity(ies)</exception>
         public async Task<TEntity[]> FindManyAsync<TEntity>(string moduleName, IDictionary<string, string> @params, IList<string> select = null, int limit = 0)
             where TEntity : class
         {
             if (!(@params?.Any() ?? false))
             {
-                throw new WSException(
+                throw new WebServiceException(
                     "You have to specify at least one search parameter (prop => value) in order to be able to retrieve entity(ies)"
                 );
             }
@@ -160,7 +160,7 @@ namespace Salaros.Vtiger.VTWSCLib
         /// <returns>
         /// The array containing matching entries or false if nothing was found
         /// </returns>
-        /// <exception cref="WSException">You have to specify at least one search parameter (prop => value) in order to be able to retrieve entity(ies)</exception>
+        /// <exception cref="WebServiceException">You have to specify at least one search parameter (prop => value) in order to be able to retrieve entity(ies)</exception>
         public TEntity[] FindMany<TEntity>(string moduleName, IDictionary<string, string> @params, IList<string> select = null, int limit = 0)
             where TEntity : class
         {
@@ -180,13 +180,13 @@ namespace Salaros.Vtiger.VTWSCLib
         /// <param name="moduleName">Name of the module.</param>
         /// <param name="params">The data for the new entity.</param>
         /// <returns>A newly created entity</returns>
-        /// <exception cref="WSException">You have to specify at least one search parameter (prop => value) in order to be able to create an entity</exception>
+        /// <exception cref="WebServiceException">You have to specify at least one search parameter (prop => value) in order to be able to create an entity</exception>
         public async Task<TEntity> CreateOneAsync<TEntity>(string moduleName, IDictionary<string, string> @params)
             where TEntity : class
         {
             if (!(@params?.Any() ?? false))
             {
-                throw new WSException(
+                throw new WebServiceException(
                     "You have to specify at least one search parameter (prop => value) in order to be able to create an entity"
                 );
             }
@@ -211,7 +211,7 @@ namespace Salaros.Vtiger.VTWSCLib
         /// <param name="moduleName">Name of the module.</param>
         /// <param name="params">The data for the new entity.</param>
         /// <returns>A newly created entity</returns>
-        /// <exception cref="WSException">You have to specify at least one search parameter (prop => value) in order to be able to create an entity</exception>
+        /// <exception cref="WebServiceException">You have to specify at least one search parameter (prop => value) in order to be able to create an entity</exception>
         public TEntity CreateOne<TEntity>(string moduleName, IDictionary<string, string> @params)
             where TEntity : class
         {
@@ -232,7 +232,7 @@ namespace Salaros.Vtiger.VTWSCLib
         /// <param name="entityId">The entity identifier.</param>
         /// <param name="params">The new entity data.</param>
         /// <returns>Updated entity</returns>
-        /// <exception cref="WSException">
+        /// <exception cref="WebServiceException">
         /// You have to specify at least one search parameter (prop => value) in order to be able to update the entity(ies)
         /// or
         /// The list of constrains must contain a valid ID
@@ -244,18 +244,18 @@ namespace Salaros.Vtiger.VTWSCLib
         {
             if (!(@params?.Any() ?? false))
             {
-                throw new WSException(
+                throw new WebServiceException(
                     "You have to specify at least one search parameter (prop => value) in order to be able to update the entity(ies)"
                 );
             }
             // Fail if no ID was supplied
             if (string.IsNullOrWhiteSpace(entityId))
-                throw new WSException("The list of constrains must contain a valid ID");
+                throw new WebServiceException("The list of constrains must contain a valid ID");
 
             // Check if the entity exists + retrieve its data so it can be used below
             var entityData = await FindOneByIdAsync<JObject>(moduleName, entityId);
             if (null == entityData) {
-                throw new WSException("Such entity doesn't exist, so it cannot be updated");
+                throw new WebServiceException("Such entity doesn't exist, so it cannot be updated");
             }
 
             // The new data overrides the existing one needed to provide
@@ -281,7 +281,7 @@ namespace Salaros.Vtiger.VTWSCLib
         /// <param name="entityId">The entity identifier.</param>
         /// <param name="params">The new entity data.</param>
         /// <returns>Updated entity</returns>
-        /// <exception cref="WSException">
+        /// <exception cref="WebServiceException">
         /// You have to specify at least one search parameter (prop => value) in order to be able to update the entity(ies)
         /// or
         /// The list of constrains must contain a valid ID
