@@ -1,4 +1,4 @@
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -125,15 +125,21 @@ namespace Salaros.Vtiger.WebService
         /// <param name="params">Data used to find matching entries.</param>
         /// <param name="select">The list of fields to select (defaults to SQL-like '*' - all the fields).</param>
         /// <param name="limit">The limit the list of entries to N records (acts like LIMIT in SQL).</param>
+        /// <param name="offset">The offset for the query.</param>
         /// <returns>
         /// The array containing matching entries or false if nothing was found
         /// </returns>
-        /// <exception cref="WebServiceException">You have to specify at least one search parameter (prop => value) in order to be able to retrieve entity(ies)</exception>
-        public async Task<TEntity[]> FindManyAsync<TEntity>(string moduleName, IDictionary<string, string> @params, IList<string> select = null, int limit = 0)
+        public async Task<TEntity[]> FindManyAsync<
+            TEntity>(string moduleName,
+            IDictionary<string, string> @params, 
+            IList<string> select = null,
+            long limit = 0,
+            long offset = 0
+        )
             where TEntity : class
         {
             // Builds the query
-            var query = GetQueryString(moduleName, @params, select, limit);
+            var query = GetQueryString(moduleName, @params, select, limit, offset);
 
             // Run the query
             var records = await parentClient.ExecuteQueryAsync<TEntity[]>(query);
@@ -150,14 +156,20 @@ namespace Salaros.Vtiger.WebService
         /// <param name="params">Data used to find matching entries.</param>
         /// <param name="select">The list of fields to select (defaults to SQL-like '*' - all the fields).</param>
         /// <param name="limit">The limit the list of entries to N records (acts like LIMIT in SQL).</param>
+        /// <param name="offset">The offset for the query.</param>
         /// <returns>
         /// The array containing matching entries or false if nothing was found
         /// </returns>
-        /// <exception cref="WebServiceException">You have to specify at least one search parameter (prop => value) in order to be able to retrieve entity(ies)</exception>
-        public TEntity[] FindMany<TEntity>(string moduleName, IDictionary<string, string> @params, IList<string> select = null, int limit = 0)
+        public TEntity[] FindMany<TEntity>(
+            string moduleName, 
+            IDictionary<string, string> @params,
+            IList<string> select = null,
+            long limit = 0,
+            long offset = 0
+        )
             where TEntity : class
         {
-            var findManyTask = FindManyAsync<TEntity>(moduleName, @params, select, limit);
+            var findManyTask = FindManyAsync<TEntity>(moduleName, @params, select, limit, offset);
             findManyTask.Wait();
             return findManyTask.Result;
         }
@@ -173,7 +185,6 @@ namespace Salaros.Vtiger.WebService
         /// <param name="moduleName">Name of the module.</param>
         /// <param name="params">The data for the new entity.</param>
         /// <returns>A newly created entity</returns>
-        /// <exception cref="WebServiceException">You have to specify at least one search parameter (prop => value) in order to be able to create an entity</exception>
         public async Task<TEntity> CreateOneAsync<TEntity>(string moduleName, IDictionary<string, string> @params)
             where TEntity : class
         {
@@ -197,7 +208,6 @@ namespace Salaros.Vtiger.WebService
         /// <param name="moduleName">Name of the module.</param>
         /// <param name="params">The data for the new entity.</param>
         /// <returns>A newly created entity</returns>
-        /// <exception cref="WebServiceException">You have to specify at least one search parameter (prop => value) in order to be able to create an entity</exception>
         public TEntity CreateOne<TEntity>(string moduleName, IDictionary<string, string> @params)
             where TEntity : class
         {
@@ -219,8 +229,6 @@ namespace Salaros.Vtiger.WebService
         /// <param name="params">The new entity data.</param>
         /// <returns>Updated entity</returns>
         /// <exception cref="WebServiceException">
-        /// You have to specify at least one search parameter (prop => value) in order to be able to update the entity(ies)
-        /// or
         /// The list of constrains must contain a valid ID
         /// or
         /// Such entity doesn't exist, so it cannot be updated
@@ -262,8 +270,6 @@ namespace Salaros.Vtiger.WebService
         /// <param name="params">The new entity data.</param>
         /// <returns>Updated entity</returns>
         /// <exception cref="WebServiceException">
-        /// You have to specify at least one search parameter (prop => value) in order to be able to update the entity(ies)
-        /// or
         /// The list of constrains must contain a valid ID
         /// or
         /// Such entity doesn't exist, so it cannot be updated
@@ -409,13 +415,19 @@ namespace Salaros.Vtiger.WebService
         /// <param name="params">Data used to find matching entries.</param>
         /// <param name="select">The list of fields to select (defaults to SQL-like '*' - all the fields).</param>
         /// <param name="limit">The limit the list of entries to N records (acts like LIMIT in SQL).</param>
+        /// <param name="offset">The offset.</param>
         /// <returns>
         /// The query build out of the supplied parameters
         /// </returns>
-        private static string GetQueryString(string moduleName, IDictionary<string, string> @params, IList<string> select = null, int limit = 0)
-        {
-            var query = (select?.Any() ?? false) ? "*" : string.Join(", ", select);
-            query = $"SELECT {query} FROM $moduleName";
+        private static string GetQueryString(
+            string moduleName,
+            IDictionary<string, string> @params,
+            IList<string> select = null,
+            long limit = 0,
+            long offset = 0
+        ){
+            var query = (select?.Any() ?? false) ? string.Join(", ", select) : "*";
+            query = $"SELECT {query} FROM {moduleName}";
 
             if (@params?.Any() ?? false)
             {
@@ -426,9 +438,12 @@ namespace Salaros.Vtiger.WebService
                 query = $"{query} WHERE {string.Join(" AND ", likes)}";
             }
 
-            return (limit > 0)
-                ? $"{query} LIMIT {limit}"
-                : query;
+            if (limit <= 0)
+                return query;
+
+            return (offset > 0)
+                ? $"{query} LIMIT {offset}, {limit};"
+                : $"{query} LIMIT {limit};";
         }
 
         #endregion
