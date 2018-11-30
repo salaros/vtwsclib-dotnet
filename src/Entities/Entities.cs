@@ -80,6 +80,40 @@ namespace Salaros.Vtiger.WebService
         }
 
         /// <summary>
+        /// Retrieves an entity by identifier.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="moduleName">Name of the module.</param>
+        /// <param name="entityId">The entity identifier.</param>
+        /// <param name="select">The select.</param>
+        /// <param name="jsonSettings">The JSON serialization settings.</param>
+        /// <returns></returns>
+        public TEntity FindOneById<TEntity>(string moduleName, long entityId, IList<string> select = null, JsonSerializerSettings jsonSettings = null)
+            where TEntity : class
+        {
+            var findTask = FindOneByIdAsync<TEntity>(moduleName, entityId, select, jsonSettings);
+            findTask.Wait();
+            return findTask.Result;
+        }
+
+        /// <summary>
+        /// Retrieves an entity by identifier.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="moduleName">Name of the module.</param>
+        /// <param name="entityId">The entity identifier.</param>
+        /// <param name="select">The select.</param>
+        /// <param name="jsonSettings">The JSON serialization settings.</param>
+        /// <returns></returns>
+        public TEntity FindOneById<TEntity>(string moduleName, string entityId, IList<string> select = null, JsonSerializerSettings jsonSettings = null)
+            where TEntity : class
+        {
+            var findTask = FindOneByIdAsync<TEntity>(moduleName, entityId, select, jsonSettings);
+            findTask.Wait();
+            return findTask.Result;
+        }
+
+        /// <summary>
         /// Retrieve the entity asynchronously matching a list of constraints.
         /// </summary>
         /// <typeparam name="TEntity">The name of the module / entity type.</typeparam>
