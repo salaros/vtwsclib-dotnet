@@ -96,7 +96,7 @@ namespace Salaros.Vtiger.WebService
             if (null == typeInfo || string.IsNullOrWhiteSpace(typeInfo.IdPrefix))
                 throw new WebServiceException($"The following module is not installed: {moduleName}");
 
-            return $"{typeInfo}x{entityID}";
+            return $"{typeInfo.IdPrefix}x{entityID}";
         }
 
         /// <summary>

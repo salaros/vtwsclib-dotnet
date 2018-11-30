@@ -98,8 +98,8 @@ namespace Salaros.Vtiger.WebService
         )
             where TEntity : class
         {
-            var entityID = GetNumericId(moduleName, @params);
-            return (entityID < 0)
+            var entityID = GetId(moduleName, @params);
+            return (string.IsNullOrWhiteSpace(entityID))
                 ? null
                 : await FindOneByIdAsync<TEntity>(moduleName, entityID, select, jsonSettings);
         }
