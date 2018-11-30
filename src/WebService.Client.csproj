@@ -19,9 +19,9 @@
   <PropertyGroup>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>Salaros.VTiger.WebService.Client</PackageId>
-    <AssemblyVersion>0.2.3.0</AssemblyVersion>
-    <FileVersion>0.2.3.0</FileVersion>
-    <Version>0.2.3</Version>
+    <AssemblyVersion>0.2.4.0</AssemblyVersion>
+    <FileVersion>0.2.4.0</FileVersion>
+    <Version>0.2.4</Version>
     <Company>Salaros</Company>
     <Product>vtwsclib-dotnet</Product>
     <Description>A C# .NET client for vTiger's Web Services APIs. Works well vTiger forks such as VTE CRM</Description>
