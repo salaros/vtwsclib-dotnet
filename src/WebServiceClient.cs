@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -74,9 +75,11 @@ namespace Salaros.Vtiger.WebService
         /// </summary>
         /// <typeparam name="TRes">The type of the resource.</typeparam>
         /// <param name="query">The query string / expression.</param>
+        /// <param name="jsonSettings">The JSON serialization settings.</param>
         /// <returns></returns>
+        /// <exception cref="System.ArgumentException">query</exception>
         /// <exception cref="ArgumentException">query</exception>
-        public async Task<TRes> ExecuteQueryAsync<TRes>(string query)
+        public async Task<TRes> ExecuteQueryAsync<TRes>(string query, JsonSerializerSettings jsonSettings)
             where TRes : class
         {
             if (string.IsNullOrWhiteSpace(query))
@@ -85,7 +88,8 @@ namespace Salaros.Vtiger.WebService
             return await InvokeOperationAsync<TRes>(
                 "query", 
                 new Dictionary<string, string> { { "query", query } }, 
-                HttpMethod.Get
+                HttpMethod.Get,
+                jsonSettings
             );
         }
 
@@ -94,11 +98,12 @@ namespace Salaros.Vtiger.WebService
         /// </summary>
         /// <typeparam name="TRes">The type of the resource.</typeparam>
         /// <param name="query">The query string / expression.</param>
+        /// <param name="jsonSettings">The JSON serialization settings.</param>
         /// <returns></returns>
-        public TRes ExecuteQuery<TRes>(string query)
+        public TRes ExecuteQuery<TRes>(string query, JsonSerializerSettings jsonSettings = null)
             where TRes : class
         {
-            var queryTask = ExecuteQueryAsync<TRes>(query);
+            var queryTask = ExecuteQueryAsync<TRes>(query, jsonSettings);
             queryTask.Wait();
             return queryTask?.Result;
         }
@@ -110,13 +115,14 @@ namespace Salaros.Vtiger.WebService
         /// <param name="operation">The operation.</param>
         /// <param name="operationData">The dictionary.</param>
         /// <param name="method">The method.</param>
+        /// <param name="jsonSettings">The JSON serialization settings.</param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        public async Task<TRes> InvokeOperationAsync<TRes>(string operation, Dictionary<string, string> operationData, HttpMethod method)
+        public async Task<TRes> InvokeOperationAsync<TRes>(string operation, Dictionary<string, string> operationData, HttpMethod method, JsonSerializerSettings jsonSettings = null)
             where TRes : class
         {
             operationData["operation"] = operation;
-            return await Session.SendHttpRequestAsync<TRes>(operationData, method);
+            return await Session.SendHttpRequestAsync<TRes>(operationData, method, jsonSettings);
         }
 
         /// <summary>
@@ -126,11 +132,12 @@ namespace Salaros.Vtiger.WebService
         /// <param name="operation">The operation.</param>
         /// <param name="operationData">The operation data.</param>
         /// <param name="method">The method.</param>
+        /// <param name="jsonSettings">The JSON serialization settings.</param>
         /// <returns></returns>
-        public TRes InvokeOperation<TRes>(string operation, Dictionary<string, string> operationData, HttpMethod method)
+        public TRes InvokeOperation<TRes>(string operation, Dictionary<string, string> operationData, HttpMethod method, JsonSerializerSettings jsonSettings = null)
             where TRes : class
         {
-            var invokeTask = InvokeOperationAsync<TRes>(operation, operationData, method);
+            var invokeTask = InvokeOperationAsync<TRes>(operation, operationData, method, jsonSettings);
             invokeTask.Wait();
             return invokeTask?.Result;
         }

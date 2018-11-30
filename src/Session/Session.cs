@@ -8,6 +8,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Collections;
+using Newtonsoft.Json;
 
 namespace Salaros.Vtiger.WebService
 {
@@ -81,10 +82,10 @@ namespace Salaros.Vtiger.WebService
         /// <param name="requestData">The request data.</param>
         /// <param name="method">The method.</param>
         /// <returns></returns>
-        internal TRes SendHttpRequest<TRes>(Dictionary<string, string> requestData, HttpMethod method = null)
+        internal TRes SendHttpRequest<TRes>(Dictionary<string, string> requestData, HttpMethod method = null, JsonSerializerSettings jsonSettings = null)
             where TRes : class
         {
-            var sendRequestTask = SendHttpRequestAsync<TRes>(requestData, method);
+            var sendRequestTask = SendHttpRequestAsync<TRes>(requestData, method, jsonSettings);
             sendRequestTask.Wait();
             return sendRequestTask.Result;
         }
@@ -95,18 +96,20 @@ namespace Salaros.Vtiger.WebService
         /// <typeparam name="TRes">The type of the resource.</typeparam>
         /// <param name="requestData">HTTP request data.</param>
         /// <param name="method">HTTP request method (GET, POST etc), use <see cref="WebRequestMethods.Http" /> verbs</param>
+        /// <param name="jsonSettings">The JSON serialization settings.</param>
         /// <returns>
         /// Returns request result object (null in case of failure)
         /// </returns>
-        /// <exception cref="ArgumentException">Please specify a valid operation - requestData</exception>
-        /// <exception cref="WebServiceException">Unsupported request type {method}
+        /// <exception cref="System.ArgumentException">Please specify a valid operation - requestData</exception>
+        /// <exception cref="WebServiceException">Unsupported request type method
         /// or
         /// Failed to execute request on the following URL, FAILED_SENDING_REQUEST
         /// or
         /// or
         /// Failed to parse the following vTiger response: raw JSON response</exception>
         /// <exception cref="Uri"></exception>
-        internal async Task<TRes> SendHttpRequestAsync<TRes>(Dictionary<string, string> requestData, HttpMethod method = null)
+        /// <exception cref="ArgumentException">Please specify a valid operation - requestData</exception>
+        internal async Task<TRes> SendHttpRequestAsync<TRes>(Dictionary<string, string> requestData, HttpMethod method = null, JsonSerializerSettings jsonSettings = null)
             where TRes : class
         {
             if (null == method)
@@ -185,14 +188,9 @@ namespace Salaros.Vtiger.WebService
                         case Type entities when entities.IsArray && entities == typeof(CrmEntity[]):
                             return result.Select(e => new CrmEntity(e as JToken))?.ToArray() as TRes;
 
-                        // Array of the given type
-                        case Type objects when objects.IsArray:
-                            var singleType = Type.GetType(objects.FullName.Replace("[]", string.Empty));
-                            return new ArrayList(result.Select(e => e.ToObject(singleType)).ToArray()).ToArray(singleType) as TRes;
-
-                        // Try to convert JObject to the actual type
+                        // Try to re-parse JSON to the given type
                         default:
-                            return result.ToObject<TRes>();
+                            return JsonConvert.DeserializeObject<TRes>(result?.ToString(), jsonSettings ?? new JsonSerializerSettings());
                     }
 
                 default:
@@ -276,7 +274,7 @@ namespace Salaros.Vtiger.WebService
                     { "operation", "login_pwd" },
                     { "username", userName },
                     { "password", password },
-                }
+                }                
             ) ?? throw new WebServiceException("Failed to log in");
 
             // Extract access key from user + password login
