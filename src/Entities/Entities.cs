@@ -348,6 +348,63 @@ namespace Salaros.Vtiger.WebService
             return updateTask.Result;
         }
 
+        /// <summary>
+        /// Updates the given entity asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The name of the module / entity type.</typeparam>
+        /// <param name="moduleName">Name of the module.</param>
+        /// <param name="entityId">The entity identifier.</param>
+        /// <param name="entity">The entity.</param>
+        /// <param name="jsonSettings">The JSON serialization settings.</param>
+        /// <returns>
+        /// Updated entity
+        /// </returns>
+        /// <exception cref="WebServiceException">The list of constrains must contain a valid ID
+        /// or
+        /// Such entity doesn't exist, so it cannot be updated</exception>
+        public async Task<TEntity> UpdateOneAsync<TEntity>(
+            string moduleName,
+            string entityId,
+            TEntity entity,
+            JsonSerializerSettings jsonSettings = null
+        )
+            where TEntity : class
+        {
+            if (entity == null)
+                throw new ArgumentNullException(nameof(entity));
+
+            var entityJObj = JObject.FromObject(entity, JsonSerializer.Create(jsonSettings));
+            var @params = entityJObj.ToObject<Dictionary<string, string>>();
+            return await UpdateOneAsync<TEntity>(moduleName, entityId, @params, jsonSettings);
+        }
+
+        /// <summary>
+        /// Updates the given entity.
+        /// </summary>
+        /// <typeparam name="TEntity">The name of the module / entity type.</typeparam>
+        /// <param name="moduleName">Name of the module.</param>
+        /// <param name="entityId">The entity identifier.</param>
+        /// <param name="entity">The entity.</param>
+        /// <param name="jsonSettings">The JSON serialization settings.</param>
+        /// <returns>
+        /// Updated entity
+        /// </returns>
+        /// <exception cref="WebServiceException">The list of constrains must contain a valid ID
+        /// or
+        /// Such entity doesn't exist, so it cannot be updated</exception>
+        public TEntity UpdateOne<TEntity>(
+            string moduleName,
+            string entityId,
+            TEntity entity,
+            JsonSerializerSettings jsonSettings = null
+        )
+            where TEntity : class
+        {
+            var updateTask = UpdateOneAsync(moduleName, entityId, entity, jsonSettings);
+            updateTask.Wait();
+            return updateTask.Result;
+        }
+
         #endregion Update
 
         #region Delete
