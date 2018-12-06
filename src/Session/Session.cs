@@ -147,6 +147,9 @@ namespace Salaros.Vtiger.WebService
 
                     case var _ when HttpMethod.Post.Method.Equals(method.Method):
                         var result = await httpClient.PostAsync(requestUrl, new FormUrlEncodedContent(requestData.ToList()));
+                        if ((int)result.StatusCode > 399)
+                            throw new WebServiceException($"Server has replied with the following status code: {result.StatusCode}");
+
                         jsonRaw = await result.Content.ReadAsStringAsync();
                         break;
 
@@ -163,13 +166,15 @@ namespace Salaros.Vtiger.WebService
                 );
             }
 
+            if (string.IsNullOrWhiteSpace(jsonRaw))
+                throw new InvalidOperationException("Server replied with an empty string, which is a clear sign of an error!");
+
             // Parse the raw JSON response
             switch (JObject.Parse(jsonRaw))
             {
                 // Parse error object
-                case var errorObj when bool.TryParse(errorObj?["error"]?.ToString(), out bool isSuccess) && isSuccess:
-                    var error = errorObj?["error"];
-                    throw new WebServiceException(error?.Value<string>("message"), error?.Value<string>("code"));
+                case var errorObj when errorObj.TryGetValue("error", StringComparison.OrdinalIgnoreCase, out JToken errorToken):
+                    throw new WebServiceException(errorToken?.Value<string>("message"), errorToken?.Value<string>("code"));
                 
                 // Parse success / result object
                 case var successObj when bool.TryParse(successObj?["success"]?.ToString(), out bool isSuccess) && isSuccess:

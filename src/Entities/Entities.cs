@@ -35,14 +35,14 @@ namespace Salaros.Vtiger.WebService
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="moduleName">Name of the module.</param>
-        /// <param name="entityId">The entity identifier.</param>
+        /// <param name="numericId">The entity identifier.</param>
         /// <param name="select">The select.</param>
         /// <param name="jsonSettings">The JSON serialization settings.</param>
         /// <returns></returns>
-        public async Task<TEntity> FindOneByIdAsync<TEntity>(string moduleName, long entityId, IList<string> select = null, JsonSerializerSettings jsonSettings = null)
+        public async Task<TEntity> FindOneByIdAsync<TEntity>(string moduleName, long numericId, IList<string> select = null, JsonSerializerSettings jsonSettings = null)
             where TEntity : class
         {
-            var entityTypedId = await parentClient.Modules.GetTypedIdAsync(moduleName, entityId);
+            var entityTypedId = await parentClient.Modules.GetTypedIdAsync(moduleName, numericId, jsonSettings);
             return await FindOneByIdAsync<TEntity>(moduleName, entityTypedId, select, jsonSettings);
         }
 
@@ -84,14 +84,14 @@ namespace Salaros.Vtiger.WebService
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="moduleName">Name of the module.</param>
-        /// <param name="entityId">The entity identifier.</param>
+        /// <param name="numericId">The entity identifier.</param>
         /// <param name="select">The select.</param>
         /// <param name="jsonSettings">The JSON serialization settings.</param>
         /// <returns></returns>
-        public TEntity FindOneById<TEntity>(string moduleName, long entityId, IList<string> select = null, JsonSerializerSettings jsonSettings = null)
+        public TEntity FindOneById<TEntity>(string moduleName, long numericId, IList<string> select = null, JsonSerializerSettings jsonSettings = null)
             where TEntity : class
         {
-            var findTask = FindOneByIdAsync<TEntity>(moduleName, entityId, select, jsonSettings);
+            var findTask = FindOneByIdAsync<TEntity>(moduleName, numericId, select, jsonSettings);
             findTask.Wait();
             return findTask.Result;
         }
@@ -222,6 +222,11 @@ namespace Salaros.Vtiger.WebService
             return findManyTask.Result;
         }
 
+        public object FindOneById<T>(object uPGRADES, string upgradeId)
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion Find / retrieve MANY
 
         #region Create
@@ -270,9 +275,45 @@ namespace Salaros.Vtiger.WebService
             return createTask.Result;
         }
 
+        /// <summary>
+        /// Creates an entity asynchronously for the giving module / entity.
+        /// </summary>
+        /// <typeparam name="TEntity">Name of the module / entity type for which the entry has to be created.</typeparam>
+        /// <param name="moduleName">Name of the module.</param>
+        /// <param name="entity">The data for the new entity.</param>
+        /// <param name="jsonSettings">The JSON serialization settings.</param>
+        /// <returns>
+        /// A newly created entity
+        /// </returns>
+        public async Task<TEntity> CreateOneAsync<TEntity>(string moduleName, TEntity entity, JsonSerializerSettings jsonSettings = null)
+            where TEntity : class
+        {
+            var entityJObj = JObject.FromObject(entity, JsonSerializer.Create(jsonSettings));
+            var @params = entityJObj.ToObject<Dictionary<string, object>>().ToDictionary(i => i.Key, i => i.Value?.ToString());
+            return await CreateOneAsync<TEntity>(moduleName, @params, jsonSettings);
+        }
+
+        /// <summary>
+        /// Creates an entity for the giving module / entity.
+        /// </summary>
+        /// <typeparam name="TEntity">Name of the module / entity type for which the entry has to be created.</typeparam>
+        /// <param name="moduleName">Name of the module.</param>
+        /// <param name="entity">The data for the new entity.</param>
+        /// <param name="jsonSettings">The JSON serialization settings.</param>
+        /// <returns>
+        /// A newly created entity
+        /// </returns>
+        public TEntity CreateOne<TEntity>(string moduleName, TEntity entity, JsonSerializerSettings jsonSettings = null)
+            where TEntity : class
+        {
+            var createTask = CreateOneAsync(moduleName, entity, jsonSettings);
+            createTask.Wait();
+            return createTask.Result;
+        }
+
         #endregion Create
 
-        #region Update
+        #region Update typed ID
 
         /// <summary>
         /// Updates the given entity asynchronously.
@@ -373,9 +414,19 @@ namespace Salaros.Vtiger.WebService
             if (entity == null)
                 throw new ArgumentNullException(nameof(entity));
 
-            var entityJObj = JObject.FromObject(entity, JsonSerializer.Create(jsonSettings));
-            var @params = entityJObj.ToObject<Dictionary<string, string>>();
-            return await UpdateOneAsync<TEntity>(moduleName, entityId, @params, jsonSettings);
+            // Fail if no ID was supplied
+            if (string.IsNullOrWhiteSpace(entityId))
+                throw new WebServiceException("The list of constrains must contain a valid ID");
+
+            var entityData = JObject.FromObject(entity, JsonSerializer.Create(jsonSettings))
+                                    .ToObject<Dictionary<string, object>>()
+                                    .ToDictionary(i => i.Key, i => i.Value?.ToString());
+            var requestData = new Dictionary<string, string>
+            {
+                { "elementType", moduleName },
+                { "element", JsonConvert.SerializeObject(entityData) }
+            };
+            return await parentClient.InvokeOperationAsync<TEntity>("update", requestData, HttpMethod.Post, jsonSettings);
         }
 
         /// <summary>
@@ -405,7 +456,117 @@ namespace Salaros.Vtiger.WebService
             return updateTask.Result;
         }
 
-        #endregion Update
+        #endregion Update typed ID
+
+        #region Update numeric ID
+
+        /// <summary>
+        /// Updates the given entity.
+        /// </summary>
+        /// <typeparam name="TEntity">The name of the module / entity type.</typeparam>
+        /// <param name="moduleName">Name of the module.</param>
+        /// <param name="entityId">The entity identifier.</param>
+        /// <param name="params">The new entity data.</param>
+        /// <param name="jsonSettings">The JSON serialization settings.</param>
+        /// <returns>
+        /// Updated entity
+        /// </returns>
+        /// <exception cref="WebServiceException">The list of constrains must contain a valid ID
+        /// or
+        /// Such entity doesn't exist, so it cannot be updated</exception>
+        public async Task<TEntity> UpdateOneAsync<TEntity>(
+            string moduleName,
+            long numericId,
+            IDictionary<string, string> @params,
+            JsonSerializerSettings jsonSettings = null
+        )
+            where TEntity : class
+        {
+            var entityTypedId = await parentClient.Modules.GetTypedIdAsync(moduleName, numericId, jsonSettings);
+            return await UpdateOneAsync<TEntity>(moduleName, entityTypedId, @params, jsonSettings);
+        }
+
+        /// <summary>
+        /// Updates the given entity.
+        /// </summary>
+        /// <typeparam name="TEntity">The name of the module / entity type.</typeparam>
+        /// <param name="moduleName">Name of the module.</param>
+        /// <param name="entityId">The entity identifier.</param>
+        /// <param name="params">The new entity data.</param>
+        /// <param name="jsonSettings">The JSON serialization settings.</param>
+        /// <returns>
+        /// Updated entity
+        /// </returns>
+        /// <exception cref="WebServiceException">The list of constrains must contain a valid ID
+        /// or
+        /// Such entity doesn't exist, so it cannot be updated</exception>
+        public object UpdateOne<TEntity>(
+            string moduleName,
+            long numericId,
+            IDictionary<string, string> @params,
+            JsonSerializerSettings jsonSettings = null
+        )
+            where TEntity : class
+        {
+            var updateTask = UpdateOneAsync(moduleName, numericId, @params, jsonSettings);
+            updateTask.Wait();
+            return updateTask.Result;
+        }
+
+        /// <summary>
+        /// Updates the given entity asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The name of the module / entity type.</typeparam>
+        /// <param name="moduleName">Name of the module.</param>
+        /// <param name="entityId">The entity identifier.</param>
+        /// <param name="entity">The entity.</param>
+        /// <param name="jsonSettings">The JSON serialization settings.</param>
+        /// <returns>
+        /// Updated entity
+        /// </returns>
+        /// <exception cref="WebServiceException">The list of constrains must contain a valid ID
+        /// or
+        /// Such entity doesn't exist, so it cannot be updated</exception>
+        public async Task<TEntity> UpdateOneAsync<TEntity>(
+            string moduleName,
+            long numericId,
+            TEntity entity,
+            JsonSerializerSettings jsonSettings = null
+        )
+            where TEntity : class
+        {
+            var entityTypedId = await parentClient.Modules.GetTypedIdAsync(moduleName, numericId, jsonSettings);
+            return await UpdateOneAsync(moduleName, entityTypedId, entity, jsonSettings);
+        }
+
+        /// <summary>
+        /// Updates the given entity.
+        /// </summary>
+        /// <typeparam name="TEntity">The name of the module / entity type.</typeparam>
+        /// <param name="moduleName">Name of the module.</param>
+        /// <param name="entityId">The entity identifier.</param>
+        /// <param name="entity">The entity.</param>
+        /// <param name="jsonSettings">The JSON serialization settings.</param>
+        /// <returns>
+        /// Updated entity
+        /// </returns>
+        /// <exception cref="WebServiceException">The list of constrains must contain a valid ID
+        /// or
+        /// Such entity doesn't exist, so it cannot be updated</exception>
+        public object UpdateOne<TEntity>(
+            string moduleName,
+            long numericId,
+            TEntity entity,
+            JsonSerializerSettings jsonSettings = null
+        )
+            where TEntity : class
+        {
+            var updateTask = UpdateOneAsync(moduleName, numericId, entity, jsonSettings);
+            updateTask.Wait();
+            return updateTask.Result;
+        }
+
+        #endregion Update numeric ID
 
         #region Delete
 
@@ -413,12 +574,13 @@ namespace Salaros.Vtiger.WebService
         /// Deletes the given entity asynchronously.
         /// </summary>
         /// <param name="moduleName">The name of the module / entity type.</param>
-        /// <param name="entityId">The identifier of the entity to delete.</param>
+        /// <param name="numericId">The identifier of the entity to delete.</param>
+        /// <param name="jsonSettings">The JSON serialization settings.</param>
         /// <returns></returns>
-        public async Task<bool> DeleteOneAsync(string moduleName, long entityId)
+        public async Task<bool> DeleteOneAsync(string moduleName, long numericId, JsonSerializerSettings jsonSettings = null)
         {
-            var entityTypedId = await parentClient.Modules.GetTypedIdAsync(moduleName, entityId);
-            return await DeleteOneAsync(moduleName, entityTypedId);
+            var entityTypedId = await parentClient.Modules.GetTypedIdAsync(moduleName, numericId, jsonSettings);
+            return await DeleteOneAsync(moduleName, entityTypedId, jsonSettings);
         }
 
         /// <summary>
@@ -426,13 +588,15 @@ namespace Salaros.Vtiger.WebService
         /// </summary>
         /// <param name="moduleName">The name of the module / entity type.</param>
         /// <param name="entityId">The identifier of the entity to delete.</param>
+        /// <param name="jsonSettings">The JSON serialization settings.</param>
         /// <returns></returns>
-        public async Task<bool> DeleteOneAsync(string moduleName, string entityId)
+        public async Task<bool> DeleteOneAsync(string moduleName, string entityId, JsonSerializerSettings jsonSettings = null)
         {
             var removalResult = await parentClient.InvokeOperationAsync<JToken>(
                 "delete",
                 new Dictionary<string, string> { { "id", entityId } },
-                HttpMethod.Post
+                HttpMethod.Post,
+                jsonSettings
             );
             return null != removalResult;
         }
@@ -442,10 +606,11 @@ namespace Salaros.Vtiger.WebService
         /// </summary>
         /// <param name="moduleName">The name of the module / entity type.</param>
         /// <param name="entityId">The identifier of the entity to delete.</param>
+        /// <param name="jsonSettings">The JSON serialization settings.</param>
         /// <returns></returns>
-        public JToken DeleteOne(string moduleName, string entityId)
+        public JToken DeleteOne(string moduleName, string entityId, JsonSerializerSettings jsonSettings = null)
         {
-            var deleteTask = DeleteOneAsync(moduleName, entityId);
+            var deleteTask = DeleteOneAsync(moduleName, entityId, jsonSettings);
             deleteTask.Wait();
             return deleteTask.Result;
         }
@@ -454,11 +619,12 @@ namespace Salaros.Vtiger.WebService
         /// Deletes the given entity.
         /// </summary>
         /// <param name="moduleName">The name of the module / entity type.</param>
-        /// <param name="entityId">The identifier of the entity to delete.</param>
+        /// <param name="numericId">The identifier of the entity to delete.</param>
+        /// <param name="jsonSettings">The JSON serialization settings.</param>
         /// <returns></returns>
-        public JToken DeleteOne(string moduleName, long entityId)
+        public JToken DeleteOne(string moduleName, long numericId, JsonSerializerSettings jsonSettings = null)
         {
-            var deleteTask = DeleteOneAsync(moduleName, entityId);
+            var deleteTask = DeleteOneAsync(moduleName, numericId, jsonSettings);
             deleteTask.Wait();
             return deleteTask.Result;
         }

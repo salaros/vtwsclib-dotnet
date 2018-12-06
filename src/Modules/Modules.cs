@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -81,13 +82,14 @@ namespace Salaros.Vtiger.WebService
         /// </summary>
         /// <param name="moduleName">Name of the module / entity type.</param>
         /// <param name="entityID">Numeric entity ID.</param>
-        /// <returns>Returns false if it is not possible to retrieve module / entity type ID</returns>
-        /// <exception cref="WebServiceException">
-        /// Entity ID must be a valid number
+        /// <param name="jsonSettings">The JSON serialization settings.</param>
+        /// <returns>
+        /// Returns false if it is not possible to retrieve module / entity type ID
+        /// </returns>
+        /// <exception cref="WebServiceException">Entity ID must be a valid number
         /// or
-        /// The following module is not installed: moduleName
-        /// </exception>
-        public async Task<string> GetTypedIdAsync(string moduleName, long entityID)
+        /// The following module is not installed: moduleName</exception>
+        public async Task<string> GetTypedIdAsync(string moduleName, long entityID, JsonSerializerSettings jsonSettings = null)
         {
             if (entityID < 1)
                 throw new WebServiceException("Entity ID must be a valid number");
@@ -104,15 +106,16 @@ namespace Salaros.Vtiger.WebService
         /// </summary>
         /// <param name="moduleName">Name of the module / entity type.</param>
         /// <param name="entityID">Numeric entity ID.</param>
-        /// <returns>Returns false if it is not possible to retrieve module / entity type ID</returns>
-        /// <exception cref="WebServiceException">
-        /// Entity ID must be a valid number
+        /// <param name="jsonSettings">The JSON serialization settings.</param>
+        /// <returns>
+        /// Returns false if it is not possible to retrieve module / entity type ID
+        /// </returns>
+        /// <exception cref="WebServiceException">Entity ID must be a valid number
         /// or
-        /// The following module is not installed: moduleName
-        /// </exception>
-        public string GetTypedID(string moduleName, long entityID)
+        /// The following module is not installed: moduleName</exception>
+        public string GetTypedID(string moduleName, long entityID, JsonSerializerSettings jsonSettings = null)
         {
-            var getTypedTask = GetTypedIdAsync(moduleName, entityID);
+            var getTypedTask = GetTypedIdAsync(moduleName, entityID, jsonSettings);
             getTypedTask.Wait();
             return getTypedTask.Result;
         }
