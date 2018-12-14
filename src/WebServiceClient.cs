@@ -1,4 +1,4 @@
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -43,7 +43,7 @@ namespace Salaros.Vtiger.WebService
         /// <param name="authMode">The authentication mode.</param>
         /// <returns></returns>
         /// <exception cref="WebServiceException">Unknown login mode: '{authMode}</exception>
-        internal async Task<bool> LoginAsync(string userName, string secret, AuthMode authMode = AuthMode.AccessKey)
+        public async Task<bool> LoginAsync(string userName, string secret, AuthMode authMode = AuthMode.AccessKey)
         {
             switch (authMode)
             {
@@ -65,7 +65,7 @@ namespace Salaros.Vtiger.WebService
         /// <param name="secret">The secret.</param>
         /// <param name="authMode">The authentication mode.</param>
         /// <returns></returns>
-        internal bool Login(string userName, string secret, AuthMode authMode = AuthMode.AccessKey)
+        public bool Login(string userName, string secret, AuthMode authMode = AuthMode.AccessKey)
         {
             var loginTask = LoginAsync(userName, secret, authMode);
             loginTask.Wait();
