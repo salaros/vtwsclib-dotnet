@@ -222,11 +222,6 @@ namespace Salaros.Vtiger.WebService
             return findManyTask.Result;
         }
 
-        public object FindOneById<T>(object uPGRADES, string upgradeId)
-        {
-            throw new NotImplementedException();
-        }
-
         #endregion Find / retrieve MANY
 
         #region Create
@@ -500,7 +495,7 @@ namespace Salaros.Vtiger.WebService
         /// <exception cref="WebServiceException">The list of constrains must contain a valid ID
         /// or
         /// Such entity doesn't exist, so it cannot be updated</exception>
-        public object UpdateOne<TEntity>(
+        public TEntity UpdateOne<TEntity>(
             string moduleName,
             long numericId,
             IDictionary<string, string> @params,
@@ -508,7 +503,7 @@ namespace Salaros.Vtiger.WebService
         )
             where TEntity : class
         {
-            var updateTask = UpdateOneAsync(moduleName, numericId, @params, jsonSettings);
+            var updateTask = UpdateOneAsync<TEntity>(moduleName, numericId, @params, jsonSettings);
             updateTask.Wait();
             return updateTask.Result;
         }
@@ -553,7 +548,7 @@ namespace Salaros.Vtiger.WebService
         /// <exception cref="WebServiceException">The list of constrains must contain a valid ID
         /// or
         /// Such entity doesn't exist, so it cannot be updated</exception>
-        public object UpdateOne<TEntity>(
+        public TEntity UpdateOne<TEntity>(
             string moduleName,
             long numericId,
             TEntity entity,

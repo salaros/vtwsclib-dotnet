@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -27,7 +27,9 @@ namespace Salaros.Vtiger.WebService
             Session = new Session(this);
 
             RequestTimeout = requestTimeout;
-            WebServiceUrl = new Uri(crmUrl, relativeUrl);
+            WebServiceUrl = !string.IsNullOrWhiteSpace(relativeUrl) && (crmUrl.PathAndQuery.Contains(relativeUrl))
+                ? crmUrl
+                : new Uri(crmUrl, relativeUrl);
 
             if (!Login(userName, secret, authMode))
                 throw new WebServiceException($"Failed to log into vTiger CRM (User: '{userName}', URL: {crmUrl})");
