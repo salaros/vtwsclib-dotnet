@@ -169,8 +169,19 @@ namespace Salaros.Vtiger.WebService
             if (string.IsNullOrWhiteSpace(jsonRaw))
                 throw new InvalidOperationException("Server replied with an empty string, which is a clear sign of an error!");
 
+            JObject responseObject = null;
+
+            try
+            {
+                responseObject = JObject.Parse(jsonRaw);
+            }
+            catch (JsonReaderException ex)
+            {
+                throw new WebServiceException(jsonRaw, "UNKNOWN_ERROR", ex);
+            }
+
             // Parse the raw JSON response
-            switch (JObject.Parse(jsonRaw))
+            switch (responseObject)
             {
                 // Parse error object
                 case var errorObj when errorObj.TryGetValue("error", StringComparison.OrdinalIgnoreCase, out JToken errorToken):
@@ -179,23 +190,31 @@ namespace Salaros.Vtiger.WebService
                 // Parse success / result object
                 case var successObj when bool.TryParse(successObj?["success"]?.ToString(), out bool isSuccess) && isSuccess:
                     var result = successObj?["result"];
-                    switch (typeof(TRes))
+
+                    try
                     {
-                        // Cast to JToken
-                        case Type jtoken when jtoken == typeof(JToken):
-                            return result as TRes;
-                        
-                        // Cast to CRM entity
-                        case Type entity when entity == typeof(CrmEntity):
-                            return new CrmEntity(result as JToken) as TRes;
+                        switch (typeof(TRes))
+                        {
+                            // Cast to JToken
+                            case Type jtoken when jtoken == typeof(JToken):
+                                return result as TRes;
 
-                        // Cast to array of CRM entities
-                        case Type entities when entities.IsArray && entities == typeof(CrmEntity[]):
-                            return result.Select(e => new CrmEntity(e as JToken))?.ToArray() as TRes;
+                            // Cast to CRM entity
+                            case Type entity when entity == typeof(CrmEntity):
+                                return new CrmEntity(result as JToken) as TRes;
 
-                        // Try to re-parse JSON to the given type
-                        default:
-                            return JsonConvert.DeserializeObject<TRes>(result?.ToString(), jsonSettings ?? new JsonSerializerSettings());
+                            // Cast to array of CRM entities
+                            case Type entities when entities.IsArray && entities == typeof(CrmEntity[]):
+                                return result.Select(e => new CrmEntity(e as JToken))?.ToArray() as TRes;
+
+                            // Try to re-parse JSON to the given type
+                            default:
+                                return JsonConvert.DeserializeObject<TRes>(result?.ToString(), jsonSettings ?? new JsonSerializerSettings());
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new WebServiceException($"Failed to parse the following resposnse: {result}", "PARSING_JSON_RESPONSE", ex);
                     }
 
                 default:
