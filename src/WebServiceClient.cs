@@ -142,7 +142,15 @@ namespace Salaros.Vtiger.WebService
             return invokeTask?.Result;
         }
 
+        /// <summary>
+        /// URL currently used by a web service
+        /// </summary>
         public Uri WebServiceUrl { get; internal set; }
+
+        /// <summary>
+        /// User currently logged in
+        /// </summary>
+        public User CurrentUser => Session?.CurrentUser;
 
         /// <summary>
         /// Gets the session.
