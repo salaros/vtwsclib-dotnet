@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Salaros.Vtiger.WebService
+namespace Salaros.vTiger.WebService
 {
     public sealed class WebServiceException : Exception
     {
@@ -9,7 +9,7 @@ namespace Salaros.Vtiger.WebService
         /// </summary>
         /// <param name="message">The message.</param>
         /// <param name="code">The code.</param>
-        public WebServiceException(string message, string code = "UNKOWN", Exception ex = null) 
+        public WebServiceException(string message, string code = "UNKOWN_ERROR", Exception ex = null) 
             : base(message, ex)
         {
             Code = code;

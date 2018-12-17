@@ -1,9 +1,9 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 
-namespace Salaros.Vtiger.WebService
+namespace Salaros.vTiger.WebService
 {
-    public class Module
+    public class ModuleInfo
     {
         /// <summary>
         /// Gets or sets the identifier prefix.

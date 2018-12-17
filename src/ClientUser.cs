@@ -1,6 +1,6 @@
-﻿namespace Salaros.Vtiger.WebService
+﻿namespace Salaros.vTiger.WebService
 {
-    public class User
+    public class ClientUser
     {
         /// <summary>
         /// Gets the identifier.
@@ -24,6 +24,6 @@
         /// <value>
         /// Access or password key.
         /// </value>
-        public string SecretKey { get; internal set; }
+        internal string AccessKey { get; set; }
     }
 }
