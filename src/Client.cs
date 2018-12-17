@@ -25,6 +25,8 @@ namespace Salaros.vTiger.WebService
 
         public ClientUser CurrentUser { get; private set; }
 
+        public int RequestTimeout { get; set; } = 30;
+
         public Uri BaseUrl { get; }
 
         internal Uri FullUrl => new Uri(BaseUrl, ServiceInfo.WebservicePath);
@@ -47,8 +49,6 @@ namespace Salaros.vTiger.WebService
             }
         }
 
-        public int RequestTimeout { get; set; } = 30;
-
         public ModuleOperation UseModule(string moduleName) => new ModuleOperation(this, moduleName);
 
         public Operation InvokeOperation(string operationName) => new Operation(this, operationName);
@@ -59,7 +59,7 @@ namespace Salaros.vTiger.WebService
                 throw new ArgumentException("Must be a non-empty string.", nameof(idTyped));
 
             return InvokeOperation("retrieve")
-                .SetData("id", idTyped);
+                .WithData("id", idTyped);
         }
 
         internal bool PassChallenge(string userName)
@@ -68,8 +68,8 @@ namespace Salaros.vTiger.WebService
                 throw new ArgumentException("Must be a non-empty string.", nameof(userName));
 
             var responseToken = InvokeOperation("getchallenge")
-                .SetData("username", userName)
-                .Execute<JToken>(HttpMethod.Get);
+                .WithData("username", userName)
+                .Send();
 
             ServiceInfo.TokenExpiration = DateTimeOffset.FromUnixTimeSeconds(responseToken?.Value<long>("expireTime") ?? 0);
             ServiceInfo.Token = responseToken?.Value<string>("token");
@@ -106,12 +106,12 @@ namespace Salaros.vTiger.WebService
                 .ToLowerInvariant();
 
             var loginToken = InvokeOperation("login")
-                .SetData(new Dictionary<string, string>
+                .WithData(new Dictionary<string, string>
                 {
                     { "username", userName },
                     { "accessKey", saltedAccessKey }
                 })
-                .Execute<JToken>() ?? throw new WebServiceException("Failed to log in");
+                .SendAsPost() ?? throw new WebServiceException("Failed to log in");
 
             // Setting session name, so it can be used for subsequent calls
             sessionName = loginToken.Value<string>("sessionName");
@@ -152,16 +152,16 @@ namespace Salaros.vTiger.WebService
             var requestUrl = $"?operation={operation}";
             try
             {
-                switch (method?.Method)
+                switch (method)
                 {
-                    case "GET":
+                    case var get when HttpMethod.Get.Equals(get):
                         var query = string.Join("&", requestData.ToList()
                                 .Select(i => $"{i.Key}={Uri.EscapeUriString(i.Value ?? string.Empty)}"));
                         requestUrl = $"?{query}";
                         jsonRaw = HttpClient.GetStringAsync(requestUrl)?.Result;
                         break;
 
-                    case "POST":
+                    case var post when HttpMethod.Post.Equals(post):
                         var result = HttpClient.PostAsync(requestUrl, new FormUrlEncodedContent(requestData.ToList()))?.Result;
                         if ((int)result.StatusCode > 399)
                             throw new WebServiceException($"Server has replied with the following status code: {result.StatusCode}");

@@ -4,28 +4,47 @@ namespace Salaros.vTiger.WebService
 {
     public enum ExpressionType
     {
-        [Description("=")]
+        [Description("{0} = {1}")]
         Equals,
 
-        [Description("!=")]
+        [Description("{0} != {1}")]
         NotEquals,
 
-        [Description("LIKE")]
-        Like,
+        [Description("{0} LIKE '{1}%'")]
+        StartsWith,
 
-        [Description(">")]
+        [Description("{0} LIKE '%{1}'")]
+        EndsWith,
+
+        [Description("{0} LIKE '%{1}%'")]
+        Contains,
+
+        [Description("{0} > {1}")]
         GreaterThan,
 
-        [Description("<")]
+        [Description("{0} < {1}")]
         LessThan,
 
-        [Description(">=")]
+        [Description("{0} >= {1}")]
         GreaterOrEquals,
 
-        [Description("=<")]
+        [Description("{0} =< {1}")]
         LessOrEquals,
 
-        [Description("IN")]
+        [Description("{0} IN ({1})")]
         In,
+    }
+
+    public static class ExpressionTypeExtensions
+    {
+        public static string GetDescription(this ExpressionType source)
+        {
+            var fi = typeof(ExpressionType).GetField(source.ToString());
+            var attributes = (DescriptionAttribute[])fi.GetCustomAttributes(
+                typeof(DescriptionAttribute), false);
+
+            if (attributes != null && attributes.Length > 0) return attributes[0].Description;
+            else return source.ToString();
+        }
     }
 }

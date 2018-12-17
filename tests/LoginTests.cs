@@ -1,13 +1,7 @@
-using Moq;
-using Newtonsoft.Json;
-using Salaros.vTiger.WebService;
-using Salaros.vTiger.WebService.Tests;
 using System;
-using System.Net;
-using System.Net.Http;
 using Xunit;
 
-namespace vtwsclib.tests
+namespace Salaros.vTiger.WebService.Tests
 {
     public class LoginTests
     {
@@ -18,26 +12,12 @@ namespace vtwsclib.tests
             crmClient = new Client(new Uri("http://vtiger.local/"));
         }
 
-        public HttpClient GetHttpClient<TResponse>(TResponse fakeResponse)
-            where TResponse : class
-        {
-            var fakeHttpMessageHandler = new Mock<FakeHttpMessageHandler> { CallBase = true };
-            fakeHttpMessageHandler
-                .Setup(f => f.Send(It.IsAny<HttpRequestMessage>()))
-                .Returns(new HttpResponseMessage
-                {
-                    StatusCode = HttpStatusCode.OK,
-                    Content = new StringContent(JsonConvert.SerializeObject(fakeResponse))
-                });
-            return new HttpClient(fakeHttpMessageHandler.Object);
-        }
-
         [Fact]
         public void ChallangePasses()
         {
             // Arrange
             var dateNow = DateTimeOffset.UtcNow;
-            crmClient.HttpClient = GetHttpClient(
+            crmClient.HttpClient = FakeHttpMessageHandler.GetHttpClient(
                 new
                 {
                     success = true,
@@ -50,7 +30,6 @@ namespace vtwsclib.tests
                 }
             );
 
-
             // Act
             var challangePassed = crmClient.PassChallenge("admin");
 
@@ -62,7 +41,7 @@ namespace vtwsclib.tests
         public void UserCanLogin()
         {
             // Arrange
-            crmClient.HttpClient = GetHttpClient(
+            crmClient.HttpClient = FakeHttpMessageHandler.GetHttpClient(
                 new
                 {
                     success = true,

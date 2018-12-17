@@ -7,51 +7,14 @@ using System.Net.Http;
 
 namespace Salaros.vTiger.WebService
 {
-    public class Operation
+    public class Operation : OperationBase
     {
-        protected string operationName;
-
-        protected IDictionary<string, string> operationData;
-
-        protected IDictionary<IEnumerable<Condition>, string> operationConditions;
-
-        protected Client client;
-
         internal Operation(Client client, string operationName)
+            : base(client, operationName)
         {
-            this.client = client;
-
-            if (string.IsNullOrWhiteSpace(operationName))
-                throw new ArgumentException("Must be a non-empty string.", nameof(operationName));
-
-            this.operationName = operationName;
-
-            operationConditions = new Dictionary<IEnumerable<Condition>, string>();
-            operationData = new Dictionary<string, string>()
-            {
-                { "operation", operationName }
-            };
         }
 
-        public Operation Where<TResult>(IEnumerable<Condition> conditions)
-        {
-            operationConditions.Add(conditions, string.Empty);
-            return this;
-        }
-
-        public Operation AndWhere<TResult>(IEnumerable<Condition> conditions)
-        {
-            operationConditions.Add(conditions, "AND");
-            return this;
-        }
-
-        public Operation OrWhere(IEnumerable<Condition> conditions)
-        {
-            operationConditions.Add(conditions, "OR");
-            return this;
-        }
-
-        public Operation SetData(string key, string value)
+        public Operation WithData(string key, string value)
         {
             if (string.IsNullOrWhiteSpace(key))
                 throw new ArgumentException("Must be a non-empty string.", nameof(key));
@@ -67,7 +30,7 @@ namespace Salaros.vTiger.WebService
             return this;
         }
 
-        public Operation SetData(Dictionary<string, string> operationData)
+        public Operation WithData(Dictionary<string, string> operationData)
         {
             if (operationData == null)
                 throw new ArgumentNullException(nameof(operationData));
@@ -79,19 +42,35 @@ namespace Salaros.vTiger.WebService
             return this;
         }
 
-        public Operation SetData<TEntity>(TEntity entity, JsonSerializerSettings jsonSettings = null)
+        public Operation WithData<TEntity>(TEntity entity, JsonSerializerSettings jsonSettings = null)
             where TEntity : class
         {
             var entityData = JObject.FromObject(entity, JsonSerializer.Create(jsonSettings ?? new JsonSerializerSettings()))
                                     .ToObject<Dictionary<string, object>>()
                                     .ToDictionary(i => i.Key, i => i.Value?.ToString());
-            return SetData(entityData as Dictionary<string, string>);
+            return WithData(entityData as Dictionary<string, string>);
         }
 
-        public TResult Execute<TResult>(HttpMethod method = null, JsonSerializerSettings jsonSettings = null)
+        public virtual TResult Send<TResult>(JsonSerializerSettings jsonSettings = null)
             where TResult : class
         {
-            return client.SendRequest<TResult>(operationData, method, jsonSettings);
+            return client?.SendRequest<TResult>(operationData, HttpMethod.Get, jsonSettings);
+        }
+
+        public virtual JToken Send(JsonSerializerSettings jsonSettings = null)
+        {
+            return Send<JToken>(jsonSettings);
+        }
+
+        public virtual TResult SendAsPost<TResult>(JsonSerializerSettings jsonSettings = null)
+            where TResult : class
+        {
+            return client?.SendRequest<TResult>(operationData, HttpMethod.Post, jsonSettings);
+        }
+
+        public virtual JToken SendAsPost(JsonSerializerSettings jsonSettings = null)
+        {
+            return SendAsPost<JToken>(jsonSettings);
         }
     }
 }
