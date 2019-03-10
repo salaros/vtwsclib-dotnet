@@ -151,16 +151,28 @@ namespace Salaros.vTiger.WebService
                 .GetMany<TResult>(jsonSettings)
                 ?.FirstOrDefault();
         }
+        public ICollection<JObject> GetMany(JsonSerializerSettings jsonSettings = null)
+        {
+            return GetManyRaw(jsonSettings)
+                .Children()
+                .Select(jt => JObject.Parse(jt.ToString()))
+                .ToArray();
+        }
 
-        public JToken GetMany(JsonSerializerSettings jsonSettings = null)
+        public JToken GetOne(JsonSerializerSettings jsonSettings = null)
+        {
+            return JObject.Parse(GetOneRaw(jsonSettings)?.ToString());
+        }
+
+        public JToken GetManyRaw(JsonSerializerSettings jsonSettings = null)
         {
             operationData["query"] = CompileQuery();
             return client?.SendRequest<JToken>(operationData, HttpMethod.Get, jsonSettings);
         }
 
-        public JToken GetOne(JsonSerializerSettings jsonSettings = null)
+        public JToken GetOneRaw(JsonSerializerSettings jsonSettings = null)
         {
-            return Take(1).GetMany(jsonSettings);
+            return Take(1).GetManyRaw(jsonSettings);
         }
 
         internal string CompileQuery()
