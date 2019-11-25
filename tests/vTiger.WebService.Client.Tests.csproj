@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Product>vtwsclib-dotnet</Product>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>net462</TargetFramework>
     <RootNamespace>Salaros.vTiger.WebService.Tests</RootNamespace>
     <AssemblyName>Salaros.vTiger.WebService.Tests</AssemblyName>
     <OutputPath>..\bin\$(Configuration)\</OutputPath>

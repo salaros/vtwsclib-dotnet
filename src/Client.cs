@@ -15,44 +15,69 @@ namespace Salaros.vTiger.WebService
 
         protected string sessionName;
 
-        public Client(Uri baseUrl)
+        /// <summary>Initializes a new instance of the <see cref="Client"/> class.</summary>
+        /// <param name="options">The options.</param>
+        public Client(ClientOptions options)
+            : this(options, new HttpClient())
+        {}
+
+        /// <summary>Initializes a new instance of the <see cref="Client"/> class.</summary>
+        /// <param name="uri">The URI.</param>
+        public Client(Uri uri) : this(new ClientOptions { BaseUrl = uri })
+        {}
+
+        /// <summary>
+        ///   <para>
+        /// Initializes a new instance of the <see cref="Client"/> class.
+        /// </para>
+        /// </summary>
+        /// <param name="options">The options.</param>
+        /// <param name="httpClient">The HTTP client.</param>
+        /// <exception cref="ArgumentNullException">options
+        /// or
+        /// httpClient</exception>
+        public Client(ClientOptions options, HttpClient httpClient)
         {
-            BaseUrl = baseUrl;
+            if (options?.BaseUrl is null)
+                throw new ArgumentNullException(nameof(options));
+
+            Options = options;
+
+            // Set HTTP client up
+            this.httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+            this.httpClient.BaseAddress = Options.FullUrl;
+            this.httpClient.Timeout = TimeSpan.FromSeconds(Options.RequestTimeout);
+
             ServiceInfo = new WebServiceInfo();
         }
 
+        /// <summary>Gets the service information.</summary>
+        /// <value>The service information.</value>
         public WebServiceInfo ServiceInfo { get; }
 
+        /// <summary>Gets the options.</summary>
+        /// <value>The options.</value>
+        public ClientOptions Options { get; }
+
+        /// <summary>Gets the current user.</summary>
+        /// <value>The current user.</value>
         public ClientUser CurrentUser { get; private set; }
 
-        public int RequestTimeout { get; set; } = 30;
-
-        public Uri BaseUrl { get; }
-
-        internal Uri FullUrl => new Uri(BaseUrl, ServiceInfo.WebservicePath);
-
-        public HttpClient HttpClient
-        {
-            get
-            {
-                return httpClient ?? (httpClient = new HttpClient
-                {
-                    BaseAddress = FullUrl,
-                    Timeout = TimeSpan.FromSeconds(RequestTimeout)
-                });
-            }
-            set
-            {
-                httpClient = value;
-                httpClient.BaseAddress = FullUrl;
-                httpClient.Timeout = TimeSpan.FromSeconds(RequestTimeout);
-            }
-        }
-
+        /// <summary>Uses the module.</summary>
+        /// <param name="moduleName">Name of the module.</param>
+        /// <returns></returns>
         public ModuleOperation UseModule(string moduleName) => new ModuleOperation(this, moduleName);
 
+        /// <summary>Invokes the operation.</summary>
+        /// <param name="operationName">Name of the operation.</param>
+        /// <returns></returns>
         public Operation InvokeOperation(string operationName) => new Operation(this, operationName);
 
+        /// <summary>Retrieves the specified identifier typed.</summary>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
+        /// <param name="idTyped">The identifier typed.</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException">Must be a non-empty string. - idTyped</exception>
         public Operation Retrieve<TResult>(string idTyped)
         {
             if (string.IsNullOrWhiteSpace(idTyped))
@@ -62,6 +87,10 @@ namespace Salaros.vTiger.WebService
                 .WithData("id", idTyped);
         }
 
+        /// <summary>Passes the challenge.</summary>
+        /// <param name="userName">Name of the user.</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException">Must be a non-empty string. - userName</exception>
         internal bool PassChallenge(string userName)
         {
             if (string.IsNullOrWhiteSpace(userName))
@@ -77,30 +106,55 @@ namespace Salaros.vTiger.WebService
             return !string.IsNullOrWhiteSpace(ServiceInfo.Token) && ServiceInfo.TokenExpiration.Ticks > 0;
         }
 
-        public bool Login(string userName, string accessKey)
+        /// <summary>Logins this instance.</summary>
+        /// <exception cref="NotImplementedException"></exception>
+        internal bool Login()
         {
-            if (string.IsNullOrWhiteSpace(userName))
-                throw new ArgumentException("Must be a non-empty string.", nameof(userName));
-
-            // Pass the challenge before logging in
-            if (!PassChallenge(userName))
-                return false;
-
-            return LoginAfterChallange(userName, accessKey);
+            return Login(Options.Credentials);
         }
 
-        internal bool LoginAfterChallange(string userName, string accessKey)
+        /// <summary>Logins the specified user name.</summary>
+        /// <param name="userName">Name of the user.</param>
+        /// <param name="accessKey">The access key.</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException">Must be a non-empty string. - userName</exception>
+        public bool Login(string userName, string accessKey)
         {
-            if (string.IsNullOrWhiteSpace(userName))
-                throw new ArgumentException("Must be a non-empty string.", nameof(userName));
+            Options.Credentials = new ClientCredentials(userName, accessKey);
+            return Login(Options.Credentials);
+        }
 
-            if (string.IsNullOrWhiteSpace(accessKey))
-                throw new ArgumentException("Must be a non-empty string.", nameof(accessKey));
+        /// <summary>Logins the specified credentials.</summary>
+        /// <param name="credentials">The credentials.</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException">credentials</exception>
+        public bool Login(ClientCredentials credentials)
+        {
+            if (credentials is null)
+                throw new ArgumentNullException(nameof(credentials));
+
+            if (string.IsNullOrWhiteSpace(credentials.UserName))
+                throw new ArgumentException("Must be a non-empty string.", nameof(credentials.UserName));
+
+            // Pass the challenge before logging in
+            if (!PassChallenge(credentials.UserName))
+                return false;
+
+            return LoginAfterChallenge(credentials);
+        }
+
+        internal bool LoginAfterChallenge(ClientCredentials credentials)
+        {
+            if (string.IsNullOrWhiteSpace(credentials.UserName))
+                throw new ArgumentException("Must be a non-empty string.", nameof(credentials.UserName));
+
+            if (string.IsNullOrWhiteSpace(credentials.AccessKey))
+                throw new ArgumentException("Must be a non-empty string.", nameof(credentials.AccessKey));
 
             // Concatenate service token and access key
             // and compute MD5 of that string as per vTiger specs
             var saltedAccessKey = MD5.Create()
-                .ComputeHash(Encoding.ASCII.GetBytes($"{ServiceInfo.Token}{accessKey}"))
+                .ComputeHash(Encoding.ASCII.GetBytes($"{ServiceInfo.Token}{credentials.AccessKey}"))
                 .Select(b => b.ToString("X2"))
                 .Aggregate((s, c) => s + c)
                 .ToLowerInvariant();
@@ -108,7 +162,7 @@ namespace Salaros.vTiger.WebService
             var loginToken = InvokeOperation("login")
                 .WithData(new Dictionary<string, string>
                 {
-                    { "username", userName },
+                    { "username", credentials.UserName },
                     { "accessKey", saltedAccessKey }
                 })
                 .SendAsPost() ?? throw new WebServiceException("Failed to log in");
@@ -117,12 +171,11 @@ namespace Salaros.vTiger.WebService
             sessionName = loginToken.Value<string>("sessionName");
 
             // Backing up logged in user credentials
-            CurrentUser = new ClientUser
-            {
-                Id = loginToken?.Value<string>("userId"),
-                UserName = userName,
-                AccessKey = accessKey,
-            };
+            CurrentUser = new ClientUser(
+                loginToken?.Value<string>("userId"),
+                credentials.UserName,
+                credentials.AccessKey
+            );
 
             // vTiger CRM and WebServices API version
             ServiceInfo.ApiVersion = new Version(loginToken.Value<string>("version"));
@@ -141,11 +194,11 @@ namespace Salaros.vTiger.WebService
                 method = HttpMethod.Post;
 
             // Perform re-login if required (e.g. service token has expired)
-            // Please note: the only time login is not called is when API challenge occurs 
+            // Please note: the only time login is not called is when API challenge occurs
             if (!"getchallenge".Equals(operation) && DateTime.UtcNow.Ticks > ServiceInfo.TokenExpiration.Ticks)
-                Login(CurrentUser?.UserName, CurrentUser?.AccessKey);
+                Login(Options.Credentials);
 
-            // Inject session name into data sent to vTiger 
+            // Inject session name into data sent to vTiger
             requestData["sessionName"] = sessionName;
 
             var jsonRaw = string.Empty;
@@ -158,11 +211,11 @@ namespace Salaros.vTiger.WebService
                         var query = string.Join("&", requestData.ToList()
                                 .Select(i => $"{i.Key}={Uri.EscapeUriString(i.Value ?? string.Empty)}"));
                         requestUrl = $"?{query}";
-                        jsonRaw = HttpClient.GetStringAsync(requestUrl)?.Result;
+                        jsonRaw = httpClient.GetStringAsync(requestUrl)?.Result;
                         break;
 
                     case var post when HttpMethod.Post.Equals(post):
-                        var result = HttpClient.PostAsync(requestUrl, new FormUrlEncodedContent(requestData.ToList()))?.Result;
+                        var result = httpClient.PostAsync(requestUrl, new FormUrlEncodedContent(requestData.ToList()))?.Result;
                         if ((int)result.StatusCode > 399)
                             throw new WebServiceException($"Server has replied with the following status code: {result.StatusCode}");
 
@@ -176,7 +229,7 @@ namespace Salaros.vTiger.WebService
             catch (HttpRequestException ex)
             {
                 throw new WebServiceException(
-                    $"Failed to execute {method} request on the following URL: '{new Uri(HttpClient.BaseAddress, requestUrl)}'. {ex.Message}",
+                    $"Failed to execute {method} request on the following URL: '{new Uri(httpClient.BaseAddress, requestUrl)}'. {ex.Message}",
                     "FAILED_SENDING_REQUEST",
                     ex
                 );

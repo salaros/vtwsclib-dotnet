@@ -1,7 +1,17 @@
 ﻿namespace Salaros.vTiger.WebService
 {
-    public class ClientUser
+    public class ClientUser : ClientCredentials
     {
+        /// <summary>Initializes a new instance of the <see cref="ClientUser"/> class.</summary>
+        /// <param name="id">The identifier.</param>
+        /// <param name="userName">Name of the user.</param>
+        /// <param name="accessKey">The access key.</param>
+        internal ClientUser(string id, string userName, string accessKey)
+            : base(userName, accessKey)
+        {
+            Id = id;
+        }
+
         /// <summary>
         /// Gets the identifier.
         /// </summary>
@@ -9,21 +19,5 @@
         /// The identifier.
         /// </value>
         public string Id { get; internal set; }
-
-        /// <summary>
-        /// Gets the name of the user.
-        /// </summary>
-        /// <value>
-        /// The name of the user.
-        /// </value>
-        public string UserName { get; internal set; }
-
-        /// <summary>
-        /// Gets the access key or password.
-        /// </summary>
-        /// <value>
-        /// Access or password key.
-        /// </value>
-        internal string AccessKey { get; set; }
     }
 }

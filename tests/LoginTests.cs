@@ -5,19 +5,17 @@ namespace Salaros.vTiger.WebService.Tests
 {
     public class LoginTests
     {
-        protected Client crmClient;
-
-        public LoginTests()
+        public ClientOptions ClientOptions => new ClientOptions
         {
-            crmClient = new Client(new Uri("http://vtiger.local/"));
-        }
+            BaseUrl = new Uri("http://vtiger.local/")
+        };
 
         [Fact]
         public void ChallangePasses()
         {
             // Arrange
             var dateNow = DateTimeOffset.UtcNow;
-            crmClient.HttpClient = FakeHttpMessageHandler.GetHttpClient(
+            var crmClient = new Client(ClientOptions, FakeHttpMessageHandler.GetHttpClient(
                 new
                 {
                     success = true,
@@ -28,7 +26,7 @@ namespace Salaros.vTiger.WebService.Tests
                         expireTime = dateNow.AddMinutes(5).ToUnixTimeSeconds()
                     }
                 }
-            );
+            ));
 
             // Act
             var challangePassed = crmClient.PassChallenge("admin");
@@ -41,7 +39,10 @@ namespace Salaros.vTiger.WebService.Tests
         public void UserCanLogin()
         {
             // Arrange
-            crmClient.HttpClient = FakeHttpMessageHandler.GetHttpClient(
+            var options = ClientOptions;
+            options.Credentials = new ClientCredentials("admin", "2-G+B8AvgtQ:598A");
+
+            var crmClient = new Client(options, FakeHttpMessageHandler.GetHttpClient(
                 new
                 {
                     success = true,
@@ -54,14 +55,14 @@ namespace Salaros.vTiger.WebService.Tests
                         timezone = 0
                     }
                 }
-            );
+            ));
 
             // Faking passed challange
             crmClient.ServiceInfo.Token = "fakeToken00000";
             crmClient.ServiceInfo.TokenExpiration = DateTimeOffset.UtcNow.AddMinutes(5);
 
             // Act
-            var loginResult = crmClient.LoginAfterChallange("admin", "2-G+B8AvgtQ:598A");
+            var loginResult = crmClient.LoginAfterChallenge(options.Credentials);
 
             // Assert
             Assert.True(loginResult);

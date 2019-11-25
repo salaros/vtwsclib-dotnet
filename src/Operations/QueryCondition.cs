@@ -18,7 +18,7 @@ namespace Salaros.vTiger.WebService
 
         public QueryCondition(string column, IEnumerable<string> values)
             : this(
-                  column, 
+                  column,
                   string.Join(", ", values?.Select(v => (v != null) ? $"'{v}'" : "null")),
                   ExpressionType.In
              )

@@ -4,11 +4,13 @@ namespace Salaros.vTiger.WebService
 {
     public class WebServiceInfo
     {
+        /// <summary>Gets or sets the token expiration.</summary>
+        /// <value>The token expiration.</value>
         internal DateTimeOffset TokenExpiration { get; set; }
 
+        /// <summary>Gets or sets the token.</summary>
+        /// <value>The token.</value>
         internal string Token { get; set; }
-
-        public string WebservicePath { get; set; } = "webservice.php";
 
         /// <summary>
         /// Gets vTiger CRM and WebServices API version

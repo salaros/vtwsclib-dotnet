@@ -13,7 +13,7 @@ namespace Salaros.vTiger.WebService.Tests
         }
 
         [Fact]
-        public void ComplexQueryGenerates()
+        public void ComplexQueryIsGenerated()
         {
             // Arrange
             var queryOperation = crmClient
