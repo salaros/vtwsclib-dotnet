@@ -19,12 +19,12 @@ namespace Salaros.vTiger.WebService.Tests
             var queryOperation = crmClient
                 .UseModule("Leads")
                 .QueryEntities()
-                .Select("id", "firstname", "lastname", "company")
                 .WhereIn("leadstatus", new[] { "Cold", "Contacted", "Hot", "Warm" })
                 .OrWhere("company", "Ltd", ExpressionType.Contains)
                 .OrderByDesc("lead_no")
                 .Take(10)
-                .Skip(2);
+                .Skip(2)
+                .SelectQuery("id", "firstname", "lastname", "company");
 
             // Act
             var queryString = queryOperation.CompileQuery();

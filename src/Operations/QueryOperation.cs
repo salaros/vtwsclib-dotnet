@@ -19,6 +19,10 @@ namespace Salaros.vTiger.WebService
 
         protected long limit, offset;
 
+        /// <summary>Initializes a new instance of the <see cref="QueryOperation"/> class.</summary>
+        /// <param name="client">The client.</param>
+        /// <param name="moduleName">Name of the module.</param>
+        /// <exception cref="ArgumentException">Must be a non-empty string. - moduleName</exception>
         internal QueryOperation(Client client, string moduleName)
             : base(client, "query")
         {
@@ -34,22 +38,29 @@ namespace Salaros.vTiger.WebService
             offset = 0;
         }
 
-        public QueryOperation Select(params string[] select)
-        {
-            this.select = select ?? new string[0];
-            return this;
-        }
-
+        /// <summary>Adds WHERE <field> IN (item1, item2) type condition.</summary>
+        /// <param name="column">The column.</param>
+        /// <param name="values">The collection of values.</param>
+        /// <returns>Query object</returns>
         public QueryOperation WhereIn(string column, IEnumerable<string> values)
         {
             return Where(new QueryCondition(column, values));
         }
 
-        public QueryOperation Where(string column, string value, ExpressionType expressionType)
+        /// <summary>Adds a WHERE condition with custom expression type.</summary>
+        /// <param name="column">The column.</param>
+        /// <param name="value">The value.</param>
+        /// <param name="expressionType">Type of the expression.</param>
+        /// <returns>Query object</returns>
+        public QueryOperation Where(string column, string value, ExpressionType expressionType = ExpressionType.Equals)
         {
             return Where(new QueryCondition(column, value, expressionType));
         }
 
+        /// <summary>Adds WHERE conditions.</summary>
+        /// <param name="conditions">The conditions.</param>
+        /// <returns>Query object</returns>
+        /// <exception cref="ArgumentException">conditions</exception>
         public QueryOperation Where(params QueryCondition[] conditions)
         {
             if (conditions == null || !conditions.Any())
@@ -59,16 +70,29 @@ namespace Salaros.vTiger.WebService
             return this;
         }
 
+        /// <summary>Adds a WHERE IN condition ANDed to previous ones.</summary>
+        /// <param name="column">The column.</param>
+        /// <param name="values">The values.</param>
+        /// <returns></returns>
         public QueryOperation AndWhereIn(string column, IEnumerable<string> values)
         {
             return AndWhere(new QueryCondition(column, values));
         }
 
-        public QueryOperation AndWhere(string column, string value, ExpressionType expressionType)
+        /// <summary>Adds a WHERE condition ANDed to previous ones.</summary>
+        /// <param name="column">The column.</param>
+        /// <param name="value">The value.</param>
+        /// <param name="expressionType">Type of the expression.</param>
+        /// <returns></returns>
+        public QueryOperation AndWhere(string column, string value, ExpressionType expressionType = ExpressionType.Equals)
         {
             return AndWhere(new QueryCondition(column, value, expressionType));
         }
 
+        /// <summary>Adds WHERE conditions ANDed to previous ones.</summary>
+        /// <param name="conditions">The conditions.</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException">conditions</exception>
         public QueryOperation AndWhere(params QueryCondition[] conditions)
         {
             if (conditions == null || !conditions.Any())
@@ -82,16 +106,29 @@ namespace Salaros.vTiger.WebService
             return this;
         }
 
+        /// <summary>Adds a WHERE IN condition ORed to previous ones.</summary>
+        /// <param name="column">The column.</param>
+        /// <param name="values">The values.</param>
+        /// <returns></returns>
         public QueryOperation OrWhereIn(string column, IEnumerable<string> values)
         {
             return OrWhere(new QueryCondition(column, values));
         }
 
-        public QueryOperation OrWhere(string column, string value, ExpressionType expressionType)
+        /// <summary>Adds a WHERE condition ORed to previous ones.</summary>
+        /// <param name="column">The column.</param>
+        /// <param name="value">The value.</param>
+        /// <param name="expressionType">Type of the expression.</param>
+        /// <returns>Query object</returns>
+        public QueryOperation OrWhere(string column, string value, ExpressionType expressionType = ExpressionType.Equals)
         {
             return OrWhere(new QueryCondition(column, value, expressionType));
         }
 
+        /// <summary>Adds WHERE conditions ORed to previous ones.</summary>
+        /// <param name="conditions">The conditions.</param>
+        /// <returns>Query object</returns>
+        /// <exception cref="ArgumentException">conditions</exception>
         public QueryOperation OrWhere(params QueryCondition[] conditions)
         {
             if (conditions == null || !conditions.Any())
@@ -105,6 +142,10 @@ namespace Salaros.vTiger.WebService
             return this;
         }
 
+        /// <summary>Orders (ascending) the items by properties.</summary>
+        /// <param name="orderBy">The list of properties used for ordering.</param>
+        /// <returns>Query object</returns>
+        /// <exception cref="ArgumentException">orderBy</exception>
         public QueryOperation OrderBy(params string[] orderBy)
         {
             if (orderBy == null || !orderBy.Any())
@@ -115,6 +156,10 @@ namespace Salaros.vTiger.WebService
             return this;
         }
 
+        /// <summary>Orders (descending) the items by properties.</summary>
+        /// <param name="orderBy">The list of properties used for ordering.</param>
+        /// <returns>Query object</returns>
+        /// <exception cref="ArgumentException">orderBy</exception>
         public QueryOperation OrderByDesc(params string[] orderBy)
         {
             if (orderBy == null || !orderBy.Any())
@@ -125,56 +170,116 @@ namespace Salaros.vTiger.WebService
             return this;
         }
 
+        /// <summary>Takes the specified amount of items.</summary>
+        /// <param name="limit">The limit.</param>
+        /// <returns></returns>
         public QueryOperation Take(long limit)
         {
             this.limit = limit;
             return this;
         }
 
+        /// <summary>Skips the specified number of items.</summary>
+        /// <param name="offset">The offset.</param>
+        /// <returns></returns>
         public QueryOperation Skip(long offset)
         {
             this.offset = offset;
             return this;
         }
 
-        public TResult[] GetMany<TResult>(JsonSerializerSettings jsonSettings = null)
+        /// <summary>Generates select the query.</summary>
+        /// <param name="select">Object properties to select.</param>
+        /// <returns>The select query object</returns>
+        public QueryOperation SelectQuery(params string[] select)
+        {
+            this.select = select ?? new string[0];
+            return this;
+        }
+
+        /// <summary>Selects the specified select.</summary>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
+        /// <param name="select">Object properties to select.</param>
+        /// <returns></returns>
+        public TResult[] Select<TResult>(params string[] select)
             where TResult : class
         {
+            return Select<TResult>(null, select);
+        }
+
+        /// <summary>Selects the specified JSON settings.</summary>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
+        /// <param name="jsonSettings">The JSON settings.</param>
+        /// <param name="select">Object properties to select.</param>
+        /// <returns></returns>
+        public TResult[] Select<TResult>(JsonSerializerSettings jsonSettings, params string[] select)
+            where TResult : class
+        {
+            this.select = select ?? new string[0];
             operationData["query"] = CompileQuery();
             return client?.SendRequest<TResult[]>(operationData, HttpMethod.Get, jsonSettings);
         }
 
-        public TResult GetOne<TResult>(JsonSerializerSettings jsonSettings = null)
+        /// <summary>Selects the first.</summary>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
+        /// <param name="jsonSettings">The JSON settings.</param>
+        /// <returns></returns>
+        public TResult SelectFirst<TResult>(JsonSerializerSettings jsonSettings = null)
             where TResult : class
         {
             return Take(1)
-                .GetMany<TResult>(jsonSettings)
+                .Select<TResult>(jsonSettings)
                 ?.FirstOrDefault();
         }
-        public ICollection<JObject> GetMany(JsonSerializerSettings jsonSettings = null)
+
+        /// <summary>Selects the specified select.</summary>
+        /// <param name="select">Object properties to select.</param>
+        /// <returns></returns>
+        public ICollection<JObject> Select(params string[] select)
         {
+            return Select(null, select);
+        }
+
+        /// <summary>Selects the specified JSON settings.</summary>
+        /// <param name="jsonSettings">The JSON settings.</param>
+        /// <param name="select">Object properties to select.</param>
+        /// <returns></returns>
+        public ICollection<JObject> Select(JsonSerializerSettings jsonSettings = null, params string[] select)
+        {
+            this.select = select ?? new string[0];
             return GetManyRaw(jsonSettings)
                 .Children()
                 .Select(jt => JObject.Parse(jt.ToString()))
                 .ToArray();
         }
 
-        public JToken GetOne(JsonSerializerSettings jsonSettings = null)
+        /// <summary>Selects the single item.</summary>
+        /// <param name="jsonSettings">The JSON settings.</param>
+        /// <returns></returns>
+        public JToken SelectSingle(JsonSerializerSettings jsonSettings = null)
         {
-            return JObject.Parse(GetOneRaw(jsonSettings)?.ToString());
+            return JObject.Parse(SelectSingleRaw(jsonSettings)?.ToString());
         }
 
+        /// <summary>Gets the many raw.</summary>
+        /// <param name="jsonSettings">The JSON settings.</param>
+        /// <returns></returns>
         public JToken GetManyRaw(JsonSerializerSettings jsonSettings = null)
         {
             operationData["query"] = CompileQuery();
             return client?.SendRequest<JToken>(operationData, HttpMethod.Get, jsonSettings);
         }
 
-        public JToken GetOneRaw(JsonSerializerSettings jsonSettings = null)
+        /// <summary>Selects the single raw.</summary>
+        /// <param name="jsonSettings">The JSON settings.</param>
+        /// <returns></returns>
+        public JToken SelectSingleRaw(JsonSerializerSettings jsonSettings = null)
         {
             return Take(1).GetManyRaw(jsonSettings);
         }
 
+        /// <summary>Compiles the query.</summary>
+        /// <returns>Compiled query as string</returns>
         internal string CompileQuery()
         {
             var query = (select != null && select.Any())
@@ -214,6 +319,16 @@ namespace Salaros.vTiger.WebService
             return $"{query};";
         }
 
+        /// <summary>Compiles the condition.</summary>
+        /// <param name="condition">The condition.</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException">condition</exception>
+        /// <exception cref="NotImplementedException"></exception>
+        /// <exception cref="InvalidOperationException">
+        /// You are trying to use ExpressionType.Contains, ExpressionType.StartsWith, ExpressionType.EndsWith with a null value
+        /// or
+        /// You have to add at least one element to a collection to use with {ExpressionType.In} expression
+        /// </exception>
         private string CompileCondition(QueryCondition condition)
         {
             if (condition == null)
@@ -246,7 +361,7 @@ namespace Salaros.vTiger.WebService
                         ? "null"
                         : $"'{condition.Value}'";
                     return string.Format(description, condition.Column, value);
-            }     
+            }
         }
     }
 }
