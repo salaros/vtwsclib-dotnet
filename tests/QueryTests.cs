@@ -7,9 +7,10 @@ namespace Salaros.vTiger.WebService.Tests
     {
         protected Client crmClient;
 
+        /// <summary>Initializes a new instance of the <see cref="QueryTests"/> class.</summary>
         public QueryTests()
         {
-            crmClient = new Client(new Uri("http://vtiger.local/"));
+            crmClient = FakeClientFactory.GetOne();
         }
 
         [Fact]

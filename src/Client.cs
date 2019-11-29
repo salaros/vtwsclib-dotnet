@@ -11,9 +11,9 @@ namespace Salaros.vTiger.WebService
 {
     public class Client
     {
-        protected HttpClient httpClient;
-
         protected string sessionName;
+
+        protected HttpClient httpClient;
 
         /// <summary>Initializes a new instance of the <see cref="Client"/> class.</summary>
         /// <param name="options">The options.</param>
@@ -23,7 +23,22 @@ namespace Salaros.vTiger.WebService
 
         /// <summary>Initializes a new instance of the <see cref="Client"/> class.</summary>
         /// <param name="uri">The URI.</param>
-        public Client(Uri uri) : this(new ClientOptions { BaseUrl = uri })
+        /// <param name="httpClient">The HTTP client.</param>
+        public Client(Uri uri, HttpClient httpClient = null) : this(new ClientOptions { BaseUrl = uri }, httpClient ?? new HttpClient())
+        {}
+
+        /// <summary>Initializes a new instance of the <see cref="Client"/> class.</summary>
+        /// <param name="uri">The URI.</param>
+        /// <param name="userName">Name of the user.</param>
+        /// <param name="accessKey">The access key.</param>
+        /// <param name="httpClient">The HTTP client.</param>
+        public Client(string uri, string userName, string accessKey, HttpClient httpClient = null)
+            : this(new ClientOptions
+                {
+                    BaseUrl = new Uri(uri),
+                    Credentials = new ClientCredentials(userName, accessKey)
+                },
+                httpClient ?? new HttpClient())
         {}
 
         /// <summary>
@@ -35,8 +50,8 @@ namespace Salaros.vTiger.WebService
         /// <param name="httpClient">The HTTP client.</param>
         /// <exception cref="ArgumentNullException">options
         /// or
-        /// httpClient</exception>
-        public Client(ClientOptions options, HttpClient httpClient)
+        /// HttpClient</exception>
+        public Client(ClientOptions options, HttpClient httpClient = null)
         {
             if (options?.BaseUrl is null)
                 throw new ArgumentNullException(nameof(options));
@@ -45,6 +60,7 @@ namespace Salaros.vTiger.WebService
 
             // Set HTTP client up
             this.httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+            // ReSharper disable once PossibleNullReferenceException
             this.httpClient.BaseAddress = Options.FullUrl;
             this.httpClient.Timeout = TimeSpan.FromSeconds(Options.RequestTimeout);
 
@@ -53,15 +69,27 @@ namespace Salaros.vTiger.WebService
 
         /// <summary>Gets the service information.</summary>
         /// <value>The service information.</value>
-        public WebServiceInfo ServiceInfo { get; }
+        public WebServiceInfo ServiceInfo { get; internal set; }
 
         /// <summary>Gets the options.</summary>
         /// <value>The options.</value>
         public ClientOptions Options { get; }
 
+        /// <summary>Gets or sets the HTTP client.</summary>
+        /// <value>The HTTP client.</value>
+        internal HttpClient HttpClient
+        {
+            get => httpClient;
+            set
+            {
+                httpClient = value;
+                httpClient.BaseAddress = Options?.BaseUrl;
+            }
+        }
+
         /// <summary>Gets the current user.</summary>
         /// <value>The current user.</value>
-        public ClientUser CurrentUser { get; private set; }
+        public ClientUser CurrentUser { get; internal set; }
 
         /// <summary>Uses the module.</summary>
         /// <param name="moduleName">Name of the module.</param>
@@ -143,6 +171,13 @@ namespace Salaros.vTiger.WebService
             return LoginAfterChallenge(credentials);
         }
 
+        /// <summary>Logins the after challenge.</summary>
+        /// <param name="credentials">The credentials.</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException">Must be a non-empty string. - UserName
+        /// or
+        /// Must be a non-empty string. - AccessKey</exception>
+        /// <exception cref="WebServiceException">Failed to log in</exception>
         internal bool LoginAfterChallenge(ClientCredentials credentials)
         {
             if (string.IsNullOrWhiteSpace(credentials.UserName))
@@ -184,6 +219,29 @@ namespace Salaros.vTiger.WebService
             return !string.IsNullOrWhiteSpace(CurrentUser?.Id);
         }
 
+        /// <summary>Sends HTTP request to CRM.</summary>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
+        /// <param name="requestData">The request data.</param>
+        /// <param name="method">The method.</param>
+        /// <param name="jsonSettings">The json settings.</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException">Please specify a valid {nameof(operation)} - requestData</exception>
+        /// <exception cref="WebServiceException">
+        /// Server has replied with the following status code: {result.StatusCode}
+        /// or
+        /// Unsupported request type {method}
+        /// or
+        /// Failed to execute {method} request on the following URL: 'CRM URL HERE' - FAILED_SENDING_REQUEST
+        /// or
+        /// UNKNOWN_ERROR
+        /// or
+        /// or
+        /// Failed to parse the following responses: {result} - PARSING_JSON_RESPONSE
+        /// or
+        /// Failed to parse the following vTiger response: 'RAW JSON HERE'
+        /// </exception>
+        /// <exception cref="Uri"></exception>
+        /// <exception cref="InvalidOperationException">Server replied with an empty string, which is a clear sign of an error!</exception>
         internal TResult SendRequest<TResult>(IDictionary<string, string> requestData, HttpMethod method = null, JsonSerializerSettings jsonSettings = null)
             where TResult : class
         {
@@ -201,7 +259,7 @@ namespace Salaros.vTiger.WebService
             // Inject session name into data sent to vTiger
             requestData["sessionName"] = sessionName;
 
-            var jsonRaw = string.Empty;
+            string jsonRaw;
             var requestUrl = $"?operation={operation}";
             try
             {
@@ -278,7 +336,7 @@ namespace Salaros.vTiger.WebService
                     }
                     catch (Exception ex)
                     {
-                        throw new WebServiceException($"Failed to parse the following resposnse: {result}", "PARSING_JSON_RESPONSE", ex);
+                        throw new WebServiceException($"Failed to parse the following responses: {result}", "PARSING_JSON_RESPONSE", ex);
                     }
 
                 default:

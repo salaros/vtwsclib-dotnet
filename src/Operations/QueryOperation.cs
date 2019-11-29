@@ -148,7 +148,7 @@ namespace Salaros.vTiger.WebService
         /// <exception cref="ArgumentException">orderBy</exception>
         public QueryOperation OrderBy(params string[] orderBy)
         {
-            if (orderBy == null || !orderBy.Any())
+            if (!(orderBy?.Any() ?? false))
                 throw new ArgumentException(nameof(orderBy));
 
             this.orderBy = orderBy ?? new string[0];
@@ -162,7 +162,7 @@ namespace Salaros.vTiger.WebService
         /// <exception cref="ArgumentException">orderBy</exception>
         public QueryOperation OrderByDesc(params string[] orderBy)
         {
-            if (orderBy == null || !orderBy.Any())
+            if (!(orderBy?.Any() ?? false))
                 throw new ArgumentException(nameof(orderBy));
 
             this.orderBy = orderBy ?? new string[0];
@@ -218,6 +218,19 @@ namespace Salaros.vTiger.WebService
             this.select = select ?? new string[0];
             operationData["query"] = CompileQuery();
             return client?.SendRequest<TResult[]>(operationData, HttpMethod.Get, jsonSettings);
+        }
+
+        /// <summary>Counts the item satisfying query criteria.</summary>
+        /// <returns>The of the items satisfying query criteria</returns>
+        public long Count()
+        {
+            select = null;
+            orderBy = null;
+            limit = -1;
+            offset = -1;
+            operationData["query"] = CompileQuery("COUNT(*)");
+            var countObjects = client?.SendRequest<CountResult[]>(operationData, HttpMethod.Get);
+            return countObjects?.FirstOrDefault()?.Count ?? 0;
         }
 
         /// <summary>Selects the first.</summary>
@@ -280,11 +293,11 @@ namespace Salaros.vTiger.WebService
 
         /// <summary>Compiles the query.</summary>
         /// <returns>Compiled query as string</returns>
-        internal string CompileQuery()
+        internal string CompileQuery(string selectOverride = "*")
         {
-            var query = (select != null && select.Any())
-                ? $"SELECT {string.Join(", ", select)}"
-                : "SELECT *";
+            var query = !(select?.Any() ?? false)
+                ? $"SELECT {selectOverride}"
+                : $"SELECT {string.Join(", ", select)}";
 
             query = $"{query} FROM {operationData["elementType"]}";
 
@@ -304,7 +317,7 @@ namespace Salaros.vTiger.WebService
                 }
             }
 
-            if (orderBy.Any())
+            if (orderBy?.Any() ?? false)
             {
                 query = $"{query} ORDER BY {string.Join(",", orderBy)} {(isDescending ? "DESC" : "ASC")}";
             }

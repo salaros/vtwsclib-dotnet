@@ -31,7 +31,12 @@ namespace Salaros.vTiger.WebService.Tests
                     StatusCode = HttpStatusCode.OK,
                     Content = new StringContent(JsonConvert.SerializeObject(fakeResponse))
                 });
-            return new HttpClient(fakeHttpMessageHandler.Object);
+
+            return new HttpClient(fakeHttpMessageHandler.Object)
+            {
+                BaseAddress = new Uri("http://vtiger.local"),
+                Timeout = TimeSpan.FromSeconds(30)
+            };
         }
     }
 }

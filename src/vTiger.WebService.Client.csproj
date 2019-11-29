@@ -19,7 +19,7 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
 
-  <PropertyGroup>    
+  <PropertyGroup>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>vTiger.WebService.Client</PackageId>
     <AssemblyVersion>0.1.0.0</AssemblyVersion>

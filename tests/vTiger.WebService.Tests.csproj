@@ -26,10 +26,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\vTiger.WebService.Client.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Reference Include="System">
       <HintPath>System</HintPath>
     </Reference>
@@ -37,6 +33,10 @@
 
   <ItemGroup>
     <Folder Include="Properties\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\src\vTiger.WebService.Client.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

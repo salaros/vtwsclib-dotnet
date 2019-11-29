@@ -1,7 +1,6 @@
-
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.106
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29519.161
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{655587BD-BEA8-4DA6-9191-620164E0E8FF}"
 	ProjectSection(SolutionItems) = preProject
@@ -10,7 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "vTiger.WebService.Client.Tests", "tests\vTiger.WebService.Client.Tests.csproj", "{DE00BC3B-922F-422B-BA9D-EAE0D40107AB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "vTiger.WebService.Tests", "tests\vTiger.WebService.Tests.csproj", "{DE00BC3B-922F-422B-BA9D-EAE0D40107AB}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "vTiger.WebService.Client", "src\vTiger.WebService.Client.csproj", "{C3F6A568-90D6-440E-BFAC-980ACED5AEEB}"
 EndProject
