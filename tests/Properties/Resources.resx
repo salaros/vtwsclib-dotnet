@@ -1,0 +1,123 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="MODULE_DESCRIBE_JSON" xml:space="preserve">
+    <value>{"success":true, "result": {"label":"Contacts","name":"Contacts","createable":true,"updateable":true,"deleteable":true,"retrieveable":true,"fields":[{"name":"salutationtype","label":"Salutation","mandatory":false,"type":{"picklistValues":[{"label":"--None--","value":"--None--"},{"label":"Mr.","value":"Mr."},{"label":"Ms.","value":"Ms."},{"label":"Mrs.","value":"Mrs."},{"label":"Dr.","value":"Dr."},{"label":"Prof.","value":"Prof."}],"defaultValue":"--None--","name":"picklist"},"nullable":true,"editable":true,"fieldid":"67","uitype":"55","blockid":"4","sequence":"2"},{"name":"firstname","label":"First Name","mandatory":false,"type":{"name":"string"},"nullable":true,"editable":true,"fieldid":"68","uitype":"55","blockid":"4","sequence":"3"},{"name":"contact_no","label":"Contact No","mandatory":false,"type":{"name":"string"},"nullable":true,"editable":false,"fieldid":"69","uitype":"4","blockid":"4","sequence":"4"},{"name":"phone","label":"Office Phone","mandatory":false,"type":{"name":"phone"},"nullable":true,"editable":true,"fieldid":"70","uitype":"11","blockid":"4","sequence":"8"},{"name":"lastname","label":"Last Name","mandatory":true,"type":{"name":"string"},"nullable":false,"editable":true,"fieldid":"71","uitype":"255","blockid":"4","sequence":"1"},{"name":"mobile","label":"Mobile","mandatory":false,"type":{"name":"phone"},"nullable":true,"editable":true,"fieldid":"72","uitype":"1014","blockid":"4","sequence":"9"},{"name":"account_id","label":"Account Name","mandatory":true,"type":{"refersTo":["Accounts"],"name":"reference"},"nullable":true,"editable":true,"fieldid":"73","uitype":"10","blockid":"4","sequence":"6"},{"name":"homephone","label":"Home Phone","mandatory":false,"type":{"name":"phone"},"nullable":true,"editable":true,"fieldid":"74","uitype":"11","blockid":"4","sequence":"11"},{"name":"leadsource","label":"Lead Source","mandatory":false,"type":{"picklistValues":[{"label":"--None--","value":"--None--"},{"label":"Cold Call","value":"Cold Call"},{"label":"Existing Customer","value":"Existing Customer"},{"label":"Self Generated","value":"Self Generated"},{"label":"Employee","value":"Employee"},{"label":"Partner","value":"Partner"},{"label":"Public Relations","value":"Public Relations"},{"label":"Direct Mail","value":"Direct Mail"},{"label":"Conference","value":"Conference"},{"label":"Trade Show","value":"Trade Show"},{"label":"Web site","value":"Web Site"},{"label":"Word of mouth","value":"Word of mouth"},{"label":"Other","value":"Other"},{"label":"Mail Converter","value":"Mail Converter"},{"label":"Configurator","value":"Configurator"}],"defaultValue":"--None--","name":"picklist"},"nullable":true,"editable":true,"fieldid":"75","uitype":"15","blockid":"4","sequence":"10"},{"name":"otherphone","label":"Other Phone","mandatory":false,"type":{"name":"phone"},"nullable":true,"editable":true,"fieldid":"76","uitype":"11","blockid":"4","sequence":"13"},{"name":"title","label":"Title","mandatory":false,"type":{"name":"string"},"nullable":true,"editable":true,"fieldid":"77","uitype":"1","blockid":"4","sequence":"12"},{"name":"fax","label":"Fax","mandatory":false,"type":{"name":"string"},"nullable":true,"editable":true,"fieldid":"78","uitype":"1013","blockid":"4","sequence":"15"},{"name":"department","label":"Department","mandatory":false,"type":{"name":"string"},"nullable":true,"editable":true,"fieldid":"79","uitype":"1","blockid":"4","sequence":"14"},{"name":"birthday","label":"Date of birth","mandatory":false,"type":{"format":"dd-mm-yyyy","name":"date"},"nullable":true,"editable":true,"fieldid":"80","uitype":"5","blockid":"4","sequence":"16"},{"name":"email","label":"Email","mandatory":false,"type":{"name":"email"},"nullable":true,"editable":true,"fieldid":"81","uitype":"13","blockid":"4","sequence":"7"},{"name":"contact_id","label":"Reports To","mandatory":false,"type":{"refersTo":["Contacts"],"name":"reference"},"nullable":true,"editable":true,"fieldid":"82","uitype":"10","blockid":"4","sequence":"18"},{"name":"assistant","label":"Assistant","mandatory":false,"type":{"name":"string"},"nullable":true,"editable":true,"fieldid":"83","uitype":"1","blockid":"4","sequence":"17"},{"name":"assistantphone","label":"Assistant Phone","mandatory":false,"type":{"name":"phone"},"nullable":true,"editable":true,"fieldid":"85","uitype":"11","blockid":"4","sequence":"19"},{"name":"donotcall","label":"Do Not Call","mandatory":false,"type":{"name":"boolean"},"nullable":true,"editable":true,"fieldid":"86","uitype":"56","blockid":"4","sequence":"22"},{"name":"emailoptout","label":"Lock Automatic Emails","mandatory":false,"type":{"name":"boolean"},"nullable":true,"editable":true,"fieldid":"87","uitype":"56","blockid":"4","sequence":"21","default":"0"},{"name":"assigned_user_id","label":"Assigned To","mandatory":true,"type":{"name":"owner"},"nullable":false,"editable":true,"fieldid":"88","uitype":"53","blockid":"4","sequence":"26","default":"0"},{"name":"reference","label":"Reference","mandatory":false,"type":{"name":"boolean"},"nullable":true,"editable":true,"fieldid":"89","uitype":"56","blockid":"4","sequence":"23"},{"name":"createdtime","label":"Time created","mandatory":false,"type":{"name":"datetime"},"nullable":false,"editable":false,"fieldid":"90","uitype":"70","blockid":"4","sequence":"27","default":"0000-00-00 00:00:00"},{"name":"modifiedtime","label":"Modified Time","mandatory":false,"type":{"name":"datetime"},"nullable":false,"editable":false,"fieldid":"91","uitype":"70","blockid":"4","sequence":"28","default":"0000-00-00 00:00:00"},{"name":"vendor_id","label":"Vendor Name","mandatory":false,"type":{"refersTo":["Vendors"],"name":"reference"},"nullable":true,"editable":true,"fieldid":"92","uitype":"10","blockid":"4","sequence":"24"},{"name":"newsletter_unsubscrpt","label":"Receive newsletter","mandatory":false,"type":{"name":"boolean"},"nullable":true,"editable":true,"fieldid":"93","uitype":"56","blockid":"4","sequence":"25","default":"0"},{"name":"portal","label":"Portal User","mandatory":false,"type":{"name":"boolean"},"nullable":true,"editable":true,"fieldid":"94","uitype":"56","blockid":"6","sequence":"1"},{"name":"support_start_date","label":"Support Start Date","mandatory":false,"type":{"format":"dd-mm-yyyy","name":"date"},"nullable":true,"editable":true,"fieldid":"95","uitype":"5","blockid":"6","sequence":"2"},{"name":"support_end_date","label":"Support End Date","mandatory":false,"type":{"format":"dd-mm-yyyy","name":"date"},"nullable":true,"editable":true,"fieldid":"96","uitype":"5","blockid":"6","sequence":"3"},{"name":"mailingstreet","label":"Mailing Street","mandatory":false,"type":{"name":"text"},"nullable":true,"editable":true,"fieldid":"97","uitype":"21","blockid":"7","sequence":"1"},{"name":"otherstreet","label":"Other Street","mandatory":false,"type":{"name":"text"},"nullable":true,"editable":true,"fieldid":"98","uitype":"21","blockid":"7","sequence":"2"},{"name":"mailingcity","label":"Mailing City","mandatory":false,"type":{"name":"string"},"nullable":true,"editable":true,"fieldid":"99","uitype":"1","blockid":"7","sequence":"5"},{"name":"othercity","label":"Other City","mandatory":false,"type":{"name":"string"},"nullable":true,"editable":true,"fieldid":"100","uitype":"1","blockid":"7","sequence":"6"},{"name":"mailingstate","label":"Mailing State","mandatory":false,"type":{"name":"string"},"nullable":true,"editable":true,"fieldid":"101","uitype":"1","blockid":"7","sequence":"7"},{"name":"otherstate","label":"Other State","mandatory":false,"type":{"name":"string"},"nullable":true,"editable":true,"fieldid":"102","uitype":"1","blockid":"7","sequence":"8"},{"name":"mailingzip","label":"Mailing Postal Code","mandatory":false,"type":{"name":"string"},"nullable":true,"editable":true,"fieldid":"103","uitype":"1","blockid":"7","sequence":"9"},{"name":"otherzip","label":"Other Postal Code","mandatory":false,"type":{"name":"string"},"nullable":true,"editable":true,"fieldid":"104","uitype":"1","blockid":"7","sequence":"10"},{"name":"mailingcountry","label":"Mailing Country","mandatory":false,"type":{"refersTo":["Countries"],"name":"reference"},"nullable":true,"editable":true,"fieldid":"105","uitype":"10","blockid":"7","sequence":"11"},{"name":"othercountry","label":"Other Country","mandatory":false,"type":{"refersTo":["Countries"],"name":"reference"},"nullable":true,"editable":true,"fieldid":"106","uitype":"10","blockid":"7","sequence":"12"},{"name":"mailingpobox","label":"Mailing PO Box","mandatory":false,"type":{"name":"string"},"nullable":true,"editable":true,"fieldid":"107","uitype":"1","blockid":"7","sequence":"3"},{"name":"otherpobox","label":"Other PO Box","mandatory":false,"type":{"name":"string"},"nullable":true,"editable":true,"fieldid":"108","uitype":"1","blockid":"7","sequence":"4"},{"name":"description","label":"Description","mandatory":false,"type":{"name":"text"},"nullable":true,"editable":true,"fieldid":"110","uitype":"19","blockid":"8","sequence":"1"},{"name":"ishidden","label":"Is hidden","mandatory":false,"type":{"name":"boolean"},"nullable":true,"editable":true,"fieldid":"986","uitype":"56","blockid":"4","sequence":"29"},{"name":"password","label":"Password","mandatory":false,"type":{"name":"string"},"nullable":true,"editable":true,"fieldid":"987","uitype":"1","blockid":"4","sequence":"5"},{"name":"passwords","label":"Other passwords","mandatory":false,"type":{"name":"text"},"nullable":true,"editable":true,"fieldid":"988","uitype":"19","blockid":"4","sequence":"30"},{"name":"other_codes","label":"Other codes","mandatory":false,"type":{"name":"string"},"nullable":true,"editable":false,"fieldid":"989","uitype":"1","blockid":"4","sequence":"31"},{"name":"external_code","label":"External Code","mandatory":false,"type":{"name":"string"},"nullable":true,"editable":false,"fieldid":"1032","uitype":"1","blockid":"4","sequence":"32"},{"name":"cf_1107","label":"Contact is qualified as Lead?","mandatory":false,"type":{"name":"boolean"},"nullable":true,"editable":true,"fieldid":"1107","uitype":"56","blockid":"4","sequence":"33","default":"0"},{"name":"id","label":"contactid","mandatory":false,"type":{"name":"autogenerated"},"editable":false,"nullable":false,"default":""}],"idPrefix":"4","isEntity":true,"labelFields":"lastname,firstname"}}</value>
+  </data>
+</root>

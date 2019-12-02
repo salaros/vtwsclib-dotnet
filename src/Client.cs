@@ -96,6 +96,16 @@ namespace Salaros.vTiger.WebService
         /// <returns></returns>
         public ModuleOperation UseModule(string moduleName) => new ModuleOperation(this, moduleName);
 
+        /// <summary>Gets details about the modules accessible to user through this API.</summary>
+        /// <returns></returns>
+        public string[] GetModules()
+        {
+            var operation = new Operation(this, "listtypes");
+            var modulesRaw = operation.Send<JObject>();
+            var moduleNames = modulesRaw["types"].Children().Select(s => s?.ToString()).ToArray();
+            return moduleNames;
+        }
+
         /// <summary>Invokes the operation.</summary>
         /// <param name="operationName">Name of the operation.</param>
         /// <returns></returns>
