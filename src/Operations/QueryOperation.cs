@@ -220,19 +220,6 @@ namespace Salaros.vTiger.WebService
             return client?.SendRequest<TResult[]>(operationData, HttpMethod.Get, jsonSettings);
         }
 
-        /// <summary>Counts the item satisfying query criteria.</summary>
-        /// <returns>The of the items satisfying query criteria</returns>
-        public long Count()
-        {
-            select = null;
-            orderBy = null;
-            limit = -1;
-            offset = -1;
-            operationData["query"] = CompileQuery("COUNT(*)");
-            var countObjects = client?.SendRequest<CountResult[]>(operationData, HttpMethod.Get);
-            return countObjects?.FirstOrDefault()?.Count ?? 0;
-        }
-
         /// <summary>Selects the first.</summary>
         /// <typeparam name="TResult">The type of the result.</typeparam>
         /// <param name="jsonSettings">The JSON settings.</param>
@@ -245,7 +232,7 @@ namespace Salaros.vTiger.WebService
                 ?.FirstOrDefault();
         }
 
-        /// <summary>Selects the specified select.</summary>
+        /// <summary>Selects many items as a collection of <see cref="JObject"/>.</summary>
         /// <param name="select">Object properties to select.</param>
         /// <returns></returns>
         public ICollection<JObject> Select(params string[] select)
@@ -253,14 +240,14 @@ namespace Salaros.vTiger.WebService
             return Select(null, select);
         }
 
-        /// <summary>Selects the specified JSON settings.</summary>
+        /// <summary>Selects many items as a collection of <see cref="JObject"/>.</summary>
         /// <param name="jsonSettings">The JSON settings.</param>
         /// <param name="select">Object properties to select.</param>
         /// <returns></returns>
         public ICollection<JObject> Select(JsonSerializerSettings jsonSettings = null, params string[] select)
         {
             this.select = select ?? new string[0];
-            return GetManyRaw(jsonSettings)
+            return SelectRaw(jsonSettings)
                 .Children()
                 .Select(jt => JObject.Parse(jt.ToString()))
                 .ToArray();
@@ -271,24 +258,38 @@ namespace Salaros.vTiger.WebService
         /// <returns></returns>
         public JToken SelectSingle(JsonSerializerSettings jsonSettings = null)
         {
-            return JObject.Parse(SelectSingleRaw(jsonSettings)?.ToString());
+            var jsonTokenRaw = SelectSingleRaw(jsonSettings);
+            return JObject.Parse(jsonTokenRaw?.ToString());
         }
 
-        /// <summary>Gets the many raw.</summary>
+        /// <summary>Selects many items as raw <see cref="JToken"/>.</summary>
         /// <param name="jsonSettings">The JSON settings.</param>
         /// <returns></returns>
-        public JToken GetManyRaw(JsonSerializerSettings jsonSettings = null)
+        public JToken SelectRaw(JsonSerializerSettings jsonSettings = null)
         {
             operationData["query"] = CompileQuery();
             return client?.SendRequest<JToken>(operationData, HttpMethod.Get, jsonSettings);
         }
 
-        /// <summary>Selects the single raw.</summary>
+        /// <summary>Selects single item as raw <see cref="JToken"/>.</summary>
         /// <param name="jsonSettings">The JSON settings.</param>
         /// <returns></returns>
         public JToken SelectSingleRaw(JsonSerializerSettings jsonSettings = null)
         {
-            return Take(1).GetManyRaw(jsonSettings);
+            return Take(1).SelectRaw(jsonSettings);
+        }
+
+        /// <summary>Counts the item satisfying query criteria.</summary>
+        /// <returns>The of the items satisfying query criteria</returns>
+        public long Count()
+        {
+            select = null;
+            orderBy = null;
+            limit = -1;
+            offset = -1;
+            operationData["query"] = CompileQuery("COUNT(*)");
+            var countObjects = client?.SendRequest<CountResult[]>(operationData, HttpMethod.Get);
+            return countObjects?.FirstOrDefault()?.Count ?? 0;
         }
 
         /// <summary>Compiles the query.</summary>
