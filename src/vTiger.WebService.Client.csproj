@@ -21,10 +21,10 @@
 
   <PropertyGroup>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageId>vTiger.WebService.Client</PackageId>
-    <AssemblyVersion>0.1.0.0</AssemblyVersion>
-    <FileVersion>0.1.0.0</FileVersion>
-    <Version>0.1.0</Version>
+    <PackageId>Salaros.vTiger.WebService.Client</PackageId>
+    <AssemblyVersion>0.3.0.0</AssemblyVersion>
+    <FileVersion>0.3.0.0</FileVersion>
+    <Version>0.3.0</Version>
     <Company>Salaros</Company>
     <Description>A C# .NET client for vTiger's Web Services APIs. Works well vTiger forks such as VTE CRM</Description>
     <Authors>Zhmayev Yaroslav</Authors>
