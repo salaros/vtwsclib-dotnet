@@ -5,7 +5,7 @@ namespace Salaros.vTiger.WebService
     public class ClientOptions
     {
         /// <summary>Initializes a new instance of the <see cref="ClientOptions"/> class.</summary>
-        internal ClientOptions() { }
+        public ClientOptions() { }
 
         /// <summary>Initializes a new instance of the <see cref="ClientOptions"/> class.</summary>
         /// <param name="baseUrl">The base URL.</param>
