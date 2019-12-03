@@ -2,6 +2,8 @@
 {
     public class ClientCredentials
     {
+        public ClientCredentials() {}
+
         public ClientCredentials(string userName, string accessKey)
         {
             if (string.IsNullOrWhiteSpace(userName)) throw new System.ArgumentException(nameof(userName));
@@ -17,7 +19,7 @@
         /// <value>
         /// The name of the user.
         /// </value>
-        public string UserName { get; internal set; }
+        public string UserName { get; set; }
 
         /// <summary>
         /// Gets the access key or password.
@@ -25,6 +27,6 @@
         /// <value>
         /// Access or password key.
         /// </value>
-        internal string AccessKey { get; set; }
+        public string AccessKey { get; set; }
     }
 }
