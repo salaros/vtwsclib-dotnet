@@ -57,6 +57,36 @@ namespace Salaros.vTiger.WebService
             return Where(new QueryCondition(column, value, expressionType));
         }
 
+        /// <summary>Gets the entity where identifier equals a given one.</summary>
+        /// <param name="prefixedId"></param>
+        /// <returns></returns>
+        public QueryOperation WhereId(string prefixedId)
+        {
+            if (string.IsNullOrWhiteSpace(prefixedId))
+                throw new ArgumentException(nameof(prefixedId));
+
+            return Where(new QueryCondition("id", prefixedId, ExpressionType.Equals));
+        }
+
+        /// <summary>Gets the entity where identifier equals a given one.</summary>
+        /// <param name="id">The identifier.</param>
+        /// <returns></returns>
+        public QueryOperation WhereId(long id)
+        {
+            if (id <= 0)
+                throw new ArgumentException(nameof(id));
+
+            var moduleName = operationData["elementType"];
+            var idPrefix = client.UseModule(moduleName).Describe()?.IdPrefix;
+            var typedId = $"{idPrefix}x{id}";
+            return WhereId(typedId);
+        }
+
+        /// <summary>Gets the entity where identifier equals a given one.</summary>
+        /// <param name="id">The identifier.</param>
+        /// <returns></returns>
+        public QueryOperation WhereId(int id) => WhereId((long)id);
+
         /// <summary>Adds WHERE conditions.</summary>
         /// <param name="conditions">The conditions.</param>
         /// <returns>Query object</returns>
@@ -98,10 +128,10 @@ namespace Salaros.vTiger.WebService
             if (conditions == null || !conditions.Any())
                 throw new ArgumentException(nameof(conditions));
 
-            if (operationConditions.Any(c => string.IsNullOrWhiteSpace(c.Value)))
-                operationConditions.Add(conditions, "AND");
-            else
-                operationConditions.Add(conditions, string.Empty);
+            operationConditions.Add(conditions,
+                operationConditions.Any(c => string.IsNullOrWhiteSpace(c.Value))
+                    ? "AND"
+                    : string.Empty);
 
             return this;
         }
@@ -224,7 +254,7 @@ namespace Salaros.vTiger.WebService
         /// <typeparam name="TResult">The type of the result.</typeparam>
         /// <param name="jsonSettings">The JSON settings.</param>
         /// <returns></returns>
-        public TResult SelectFirst<TResult>(JsonSerializerSettings jsonSettings = null)
+        public TResult SelectSingle<TResult>(JsonSerializerSettings jsonSettings = null)
             where TResult : class
         {
             return Take(1)
