@@ -306,7 +306,7 @@ namespace Salaros.vTiger.WebService
         /// <returns></returns>
         public JToken SelectSingleRaw(JsonSerializerSettings jsonSettings = null)
         {
-            return Take(1).SelectRaw(jsonSettings);
+            return Take(1).SelectRaw(jsonSettings)?.FirstOrDefault();
         }
 
         /// <summary>Counts the item satisfying query criteria.</summary>
