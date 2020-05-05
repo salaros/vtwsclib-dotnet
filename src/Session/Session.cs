@@ -140,7 +140,7 @@ namespace Salaros.Vtiger.WebService
                 {
                     case var _ when HttpMethod.Get.Method.Equals(method.Method):
                         var query = string.Join("&", requestData.ToList()
-                                .Select(i => $"{i.Key}={Uri.EscapeUriString(i.Value ?? string.Empty)}"));
+                                .Select(i => $"{i.Key}={Uri.EscapeDataString(i.Value ?? string.Empty)}"));
                         requestUrl = $"?{query}";
                         jsonRaw = await httpClient.GetStringAsync(requestUrl);
                         break;
