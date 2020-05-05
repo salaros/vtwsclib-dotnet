@@ -277,7 +277,7 @@ namespace Salaros.vTiger.WebService
                 {
                     case var get when HttpMethod.Get.Equals(get):
                         var query = string.Join("&", requestData.ToList()
-                                .Select(i => $"{i.Key}={Uri.EscapeUriString(i.Value ?? string.Empty)}"));
+                                .Select(i => $"{i.Key}={Uri.EscapeDataString(i.Value ?? string.Empty)}"));
                         requestUrl = $"?{query}";
                         jsonRaw = httpClient.GetStringAsync(requestUrl)?.Result;
                         break;
