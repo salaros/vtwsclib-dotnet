@@ -95,7 +95,7 @@ deploy:
   -
     provider: NuGet
     api_key:
-      secure: i6oWn60J7ZOM4UuYcvxbuk9OAEp6or+Wq7izyJDPNlcLIhG2UKsxz7G/8erhdY3M
+      secure: g446JP6LtKi9OAKcJ99NZSF7e7lUef1kvPO6WvRXCHYREr414e5o9blf6SFBxGGo
     artifact: NuGet_Files
     server:             # remove to push to NuGet.org
     skip_symbols: false
