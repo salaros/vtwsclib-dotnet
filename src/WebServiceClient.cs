@@ -67,7 +67,9 @@ namespace Salaros.Vtiger.WebService
         /// <returns></returns>
         public bool Login(string userName, string secret, AuthMode authMode = AuthMode.AccessKey)
         {
-            var loginTask = LoginAsync(userName, secret, authMode);
+            var loginTask = Task.Factory.StartNew(() => {
+                    return LoginAsync(userName, secret, authMode).Result;
+                });
             loginTask.Wait();
             return loginTask?.Result ?? false;
         }
@@ -105,7 +107,9 @@ namespace Salaros.Vtiger.WebService
         public TRes ExecuteQuery<TRes>(string query, JsonSerializerSettings jsonSettings = null)
             where TRes : class
         {
-            var queryTask = ExecuteQueryAsync<TRes>(query, jsonSettings);
+            var queryTask = Task.Factory.StartNew(() => {
+                return ExecuteQueryAsync<TRes>(query, jsonSettings).Result;
+                });
             queryTask.Wait();
             return queryTask?.Result;
         }
